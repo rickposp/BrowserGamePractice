@@ -1,0 +1,55 @@
+#start {
+    background-color: #008CBA; /* Blue */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    visibility: visible;
+    width: 25%;
+}
+
+#stop {
+    background-color: #008CBA; /* Blue */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    visibility: hidden;
+    width: 25%;
+}
+
+#buy{
+	background-color: #008CBA; /* Blue */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    visibility: visible;
+    width: 25%;
+}
+
+body{
+	display: block;
+	margin: 0px;
+}
+
+#game_toggle{
+	margin: 8px;
+}
+
+#purchase_menu{
+	padding-top: 16px;
+}
+
+#purchase_menu{
+	margin: 8px;
+}

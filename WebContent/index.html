@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Game Practice</title>
+<link rel="stylesheet" type="text/css" href="styles.css" media="screen" />
+</head>
+
+<body>
+	<div id="game_pane">
+		<div id="game_toggle">
+			<button type="button" id="start">Start</button>
+			<button type="button" id="stop">Stop</button>
+		</div>
+		<div id="purchase_menu">
+			<button type="button" id="buy">Buy</button>
+			<select id="purchase_selector"></select>
+		</div>
+		<div id="display_pane">
+			<p id="counter"></p>
+			<p id="factories"></p>
+			<p id="account_balance"></p>
+		</div>
+	</div>
+</body>
+
+<script src="node_modules/mainloop.js/build/mainloop.min.js"></script>
+<script src="app.js"></script>
+
+</html>
