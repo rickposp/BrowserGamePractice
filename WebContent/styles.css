@@ -58,6 +58,10 @@ body{
 	margin: 8px;
 }
 
+#display_pane{
+	margin: 8px;
+}
+
 #attack_warning{
 	color: red;
 	visibility: hidden;

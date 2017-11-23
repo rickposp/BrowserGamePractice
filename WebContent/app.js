@@ -8,8 +8,10 @@ purchase_types = ["factory", "defense turret"];
 account_balance = 200;
 defense_turrets = 0;
 factories = 0;
-ai_attack_imminent = false;
+ai_attack_imminent_expired = false;
 ai_attack_action = false;
+ai_attack_cooldown_expired = false;
+ai_attack_cooldown_active = false;
 
 // calculated display values
 income_rate = 0;
@@ -17,7 +19,9 @@ income_rate = 0;
 // Time tracking
 ai_base_attack_timer = 1000 * 60 * 2;
 ai_attack_timer_range = 1000 * 60 * 5;
+ai_base_attack_cooldown_timer = 1000 * 10;
 ai_attack_timer = ai_base_attack_timer; // milliseconds
+ai_attack_cooldown_timer = ai_base_attack_cooldown_timer;
 
 MainLoop
 .setUpdate(update)
@@ -88,26 +92,47 @@ function determine_if_attack_action(){
 	return (ai_attack_timer <= 0)
 }
 
+function determine_if_attack_cooldown(){
+	return (ai_attack_cooldown_timer <= 0)
+}
+
 function update(delta){
 	income_rate = (factories * factory_profit_rate) - (defense_turrets * turrent_expense_rate)
 	account_balance += income_rate * delta;
-	ai_attack_timer -= delta;
-	ai_attack_imminent = determine_if_attack_imminent();
+	
+	ai_attack_imminent_expired = determine_if_attack_imminent();
 	ai_attack_action = determine_if_attack_action();
+	ai_attack_cooldown_expired = determine_if_attack_cooldown();
+	
+	if(!ai_attack_cooldown_active){
+		ai_attack_timer -= delta;
+	}
+	
 	if(ai_attack_action){
 		ai_attack_timer = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
+	}
+	
+	if(ai_attack_cooldown_active){
+		ai_attack_cooldown_timer -= delta;
 	}
 }
 
 function draw(delta) {
-	if(ai_attack_imminent){
+	if(ai_attack_imminent_expired){
 		element = document.getElementById('attack_warning')
 		element.innerHTML = 'WARNING! An attack is imminent!';
 		element.style.visibility = 'visible';
+		ai_attack_imminent_expired = false;
 	}
-	
 	if(ai_attack_action){
-		element = document.getElementById('attack_warning').innerHTML = 'ATTACK';
+		document.getElementById('attack_warning').innerHTML = 'ATTACK';
+		ai_attack_action = false;
+		ai_attack_cooldown_active = true;
+	}
+	if(ai_attack_cooldown_expired){
+		document.getElementById('attack_warning').style.visibility = 'hidden';
+		ai_attack_cooldown_active = false;
+		ai_attack_cooldown = false;
 	}
     document.getElementById('factories').innerHTML = "factories: " + factories;
     document.getElementById('defense_turrets').innerHTML = "defense turrets: " + defense_turrets;
