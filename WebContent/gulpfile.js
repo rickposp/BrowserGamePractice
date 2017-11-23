@@ -17,7 +17,7 @@ gulp.task('clean', function() {
 
 //Process scripts and concatenate them into one output file
 gulp.task('scripts', ['compile'], function() {
-	 gulp.src(["node_modules/mainloop.js/build/mainloop.min.js", "library/accounting.min.js", 'app.js'])
+	 gulp.src(["node_modules/mainloop.js/build/mainloop.min.js", "library/*.js", 'app.js'])
 	 .pipe(concat('app.min.js'))
 	 .pipe(gulp.dest(dist_folder));
 });
@@ -39,12 +39,16 @@ gulp.task("compile", ['clean'], function () {
 });
 
 // Static server
-gulp.task('serve', function() {
+// passing in an empty function to the init function to appease the error message
+gulp.task('serve', ['scripts', 'css', 'html'], function() {
     browserSync.init({
         server: {
             baseDir: dist_folder
         }
-    });
+    },
+    function() {});
+    gulp.watch(['app.js', 'index.html', 'main.ts', 'styles.css'], ['serve'])
+    	.on('change', browserSync.reload);
 });
 
-gulp.task('default', ['scripts', 'html', 'css']);
+gulp.task('default', ['scripts', 'html', 'css'])

@@ -1,15 +1,23 @@
 // game constants
 cost_per_factory = 100; // dollars
-factory_profit_rate = 0.02; // dollars per second
-purchase_types = ["factory"];
+factory_profit_rate = 0.002; // dollars per second
+turrent_expense_rate = 0.0005 // dollars per second
+purchase_types = ["factory", "defense turret"];
 
 // game state
-slow_balance = 0;
-account_balance = 0;
+account_balance = 200;
+defense_turrets = 0;
 factories = 0;
+ai_attack_imminent = false;
+ai_attack_action = false;
 
-// time tracking
-last_update_time = 0;
+// calculated display values
+income_rate = 0;
+
+// Time tracking
+ai_base_attack_timer = 1000 * 60 * 2;
+ai_attack_timer_range = 1000 * 60 * 5;
+ai_attack_timer = ai_base_attack_timer; // milliseconds
 
 MainLoop
 .setUpdate(update)
@@ -42,38 +50,72 @@ document.getElementById("buy").onclick = function () {
 	
 	switch(value){
 		case 'factory':
-			factories += 1;
-			account_balance -= 100;
+			if(account_balance > 100){
+				factories += 1;
+				account_balance -= 100;
+			}
+			else{
+				highlight_balance();
+			}
 			break;
+		case 'defense turret':
+			if(account_balance > 200){
+				defense_turrets += 1;
+				account_balance -= 200;
+			}
+			else{
+				highlight_balance();
+			}
 	};
 };
 
-function scaled_update(callback, time_interval){
-    timestamp = Date.now();
-    elapsed_time = timestamp - last_update_time;
-    if(elapsed_time > time_interval)
-    {
-    	callback();
-    	last_update_time = timestamp;
-    }
+function highlight_balance(){
+	e = document.getElementById('account_balance')
+	Velocity(
+		e, 
+		{ 
+		  color: "#ff0000", // Animate the text color to the hex value for pure red.
+		}, 
+		200); 
+	Velocity(e, "reverse", { duration: 1000 });
 }
 
-function update_slow_balance(){
-	slow_balance = account_balance;
+function determine_if_attack_imminent(){
+	return (ai_attack_timer <= 1000 * 30)
+}
+
+function determine_if_attack_action(){
+	return (ai_attack_timer <= 0)
 }
 
 function update(delta){
-	account_balance += factories * factory_profit_rate * delta;
-	scaled_update(update_slow_balance, 1000)
+	income_rate = (factories * factory_profit_rate) - (defense_turrets * turrent_expense_rate)
+	account_balance += income_rate * delta;
+	ai_attack_timer -= delta;
+	ai_attack_imminent = determine_if_attack_imminent();
+	ai_attack_action = determine_if_attack_action();
+	if(ai_attack_action){
+		ai_attack_timer = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
+	}
 }
 
 function draw(delta) {
+	if(ai_attack_imminent){
+		element = document.getElementById('attack_warning')
+		element.innerHTML = 'WARNING! An attack is imminent!';
+		element.style.visibility = 'visible';
+	}
+	
+	if(ai_attack_action){
+		element = document.getElementById('attack_warning').innerHTML = 'ATTACK';
+	}
     document.getElementById('factories').innerHTML = "factories: " + factories;
-    formatted_balance = accounting.formatMoney(account_balance)
+    document.getElementById('defense_turrets').innerHTML = "defense turrets: " + defense_turrets;
+    document.getElementById('income_rate').innerHTML = "income: " + income_rate;
+    formatted_balance = accounting.formatMoney(account_balance);
     document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
-    formatted_balance = accounting.formatMoney(slow_balance)
-	document.getElementById('slow_balance').innerHTML = "balance: " + formatted_balance;
     document.getElementById('fps').innerHTML = MainLoop.getFPS().toFixed(2) + " FPS";
+    document.getElementById('time_before_attack').innerHTML = "time before attack: " + ai_attack_timer;
 }
 
 function end(fps, panic) {

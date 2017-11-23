@@ -2,3 +2,4 @@ WebContent/node_modules/
 .settings/
 .project
 WebContent/dist/
+node_modules/
