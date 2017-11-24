@@ -2,16 +2,19 @@
 cost_per_factory = 100; // dollars
 factory_profit_rate = 0.002; // dollars per second
 turrent_expense_rate = 0.0005; // dollars per second
+defense_turret_counter_rate = 2;
 purchase_types = ["factory", "defense turret"];
 
 // game state
 account_balance = 200;
 defense_turrets = 0;
 factories = 0;
-ai_attack_imminent_time_expired = false;
+ai_attack_imminent_timer_expired = false;
 ai_attack_timer_expired = false;
 ai_attack_cooldown_timer_expired = false;
 ai_attack_cooldown_active = false;
+ai_attack_damage_range = 10;
+ai_attack_damage_base = 2;
 
 // calculated display values
 income_rate = 0;
@@ -22,7 +25,6 @@ ai_base_attack_timer = 1000 * 60 * 2;
 ai_attack_timer_range = 1000 * 60 * 5;
 ai_attack_timer = ai_base_attack_timer; // milliseconds
 ai_attack_cooldown_timer = 1000 * 30;
-ai_event = 0;
 timers = [];
 
 class GameEngineTimer {
@@ -113,7 +115,7 @@ MainLoop
 .setEnd(end)
 
 let timer = new GameEngineTimer(ai_attack_imminent_timer);
-timer.on('end', function(){ai_attack_imminent_time_expired = true});
+timer.on('end', function(){ai_attack_imminent_timer_expired = true});
 timer.start();
 register_timer(timer);
 
@@ -172,6 +174,12 @@ function process_timers(delta){
 		if(timer.running){
 	    	timer.tick(delta);
 		}
+		else{
+			let index = timers.indexOf(timer);
+			if (index > -1) {
+			    timers.splice(index, 1);
+			}
+		}
 	});
 }
 
@@ -186,41 +194,71 @@ function highlight_balance(){
 	Velocity(e, "reverse", { duration: 1000 });
 }
 
+function attack(){
+	let damage = Math.floor((Math.random() * ai_attack_damage_range) + ai_attack_damage_base);
+	let uncountered_damage = Math.max(damage - (defense_turrets * defense_turret_counter_rate), 0);
+	let defense_turret_damage = Math.min(defense_turrets, uncountered_damage);
+	let factory_damage = Math.min(factories, uncountered_damage - defense_turret_damage);
+	
+	defense_turrets -= defense_turret_damage;
+	factories -= factory_damage;
+	
+	console.log("attack did " + damage + " damage");
+	
+	if((factories == 0) && (uncountered_damage - defense_turret_damage - factory_damage >= 0)){
+		alert("Colony Destroyed");
+	}
+}
+
 function update(delta){
 	process_timers(delta);
 	income_rate = (factories * factory_profit_rate) - (defense_turrets * turrent_expense_rate);
 	account_balance += income_rate * delta;
-}
-
-function draw(delta) {
-	if(ai_attack_imminent_time_expired){
-		console.log("attack imminent timer expired");
-		let element = document.getElementById('attack_warning')
-		element.innerHTML = 'WARNING! An attack is imminent!';
-		element.style.visibility = 'visible';
+	
+	if(ai_attack_imminent_timer_expired){
 		let timer = new GameEngineTimer(ai_attack_timer);
 		timer.on('end', function(){ai_attack_timer_expired = true});
 		timer.start();
 		register_timer(timer);
-		ai_attack_imminent_time_expired = false;
+	}
+	
+	if(ai_attack_timer_expired){
+		let timer = new GameEngineTimer(ai_attack_cooldown_timer);
+		timer.on('end', 
+				function()
+				{
+					ai_attack_cooldown_timer_expired = true; 
+					attack();
+				});
+		timer.start();
+		register_timer(timer);
+	}
+	
+	if(ai_attack_cooldown_timer_expired){
+		let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
+		let timer = new GameEngineTimer(ai_attack_timer_duration);
+		timer.on('end', function(){ai_attack_imminent_timer_expired = true});
+		timer.start();
+		register_timer(timer);	
+	}
+}
+
+function draw(delta) {
+	if(ai_attack_imminent_timer_expired){
+		console.log("attack imminent timer expired");
+		let element = document.getElementById('attack_warning')
+		element.innerHTML = 'WARNING! An attack is imminent!';
+		element.style.visibility = 'visible';
+		ai_attack_imminent_timer_expired = false;
 	}
 	if(ai_attack_timer_expired){
 		console.log("attack action timer expired");
 		document.getElementById('attack_warning').innerHTML = 'ATTACK';
-		let timer = new GameEngineTimer(ai_attack_cooldown_timer);
-		timer.on('end', function(){ai_attack_cooldown_timer_expired = true});
-		timer.start();
-		register_timer(timer);
 		ai_attack_timer_expired = false;
 	}
 	if(ai_attack_cooldown_timer_expired){
 		console.log("attack cooldown timer expired");
 		document.getElementById('attack_warning').style.visibility = 'hidden';
-        let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
-		let timer = new GameEngineTimer(ai_attack_timer_duration);
-		timer.on('end', function(){ai_attack_imminent_time_expired = true});
-		timer.start();
-		register_timer(timer);
 		ai_attack_cooldown_timer_expired = false;
 	}
     document.getElementById('factories').innerHTML = "factories: " + factories;
