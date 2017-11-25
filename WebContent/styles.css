@@ -2,39 +2,39 @@
     background-color: #008CBA; /* Blue */
     border: none;
     color: white;
-    padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
+    font-size: medium;
     visibility: visible;
-    width: 25%;
+    width: 8em;;
+    height: 2em;
 }
 
 #stop {
     background-color: #008CBA; /* Blue */
     border: none;
     color: white;
-    padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
+    font-size: medium;
     visibility: hidden;
-    width: 25%;
+    width: 8em;
+    height: 2em;
 }
 
 #buy{
 	background-color: #008CBA; /* Blue */
     border: none;
     color: white;
-    padding: 15px 32px;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
+    font-size: medium;
     visibility: visible;
-    width: 25%;
+    width: 8em;
+    height: 2em;
 }
 
 body{
@@ -43,23 +43,26 @@ body{
 }
 
 #game_toggle{
-	margin: 8px;
+	margin: 0.2em;
 }
 
 #purchase_menu{
-	padding-top: 16px;
-}
-
-#purchase_menu{
-	margin: 8px;
+	padding-top: 0.4em;
+	margin: 0.2em;
 }
 
 #game_pane{
-	margin: 8px;
+	margin: 0.2em;
 }
 
-#display_pane{
-	margin: 8px;
+#economy_display_pane{
+	margin: 0.2em;
+	float: left;
+}
+
+#military_display_pane{
+	margin: 0.2em;
+	float: left;
 }
 
 #attack_warning{

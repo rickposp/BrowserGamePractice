@@ -4,7 +4,7 @@
 	factory_profit_rate = 0.002; // dollars per second
 	turrent_expense_rate = 0.0005; // dollars per second
 	defense_turret_counter_rate = 2;
-	purchase_types = ["factory", "defense turret"];
+	purchase_types = ["factory", "light turret"];
 	
 	// game state
 	account_balance = 200;
@@ -160,7 +160,7 @@
 					highlight_balance();
 				}
 				break;
-			case 'defense turret':
+			case 'light turret':
 				if(account_balance > 200){
 					defense_turrets += 1;
 					account_balance -= 200;
@@ -283,7 +283,7 @@
 		process_user_interface_events();
 		
 	    document.getElementById('factories').innerHTML = "factories: " + factories;
-	    document.getElementById('defense_turrets').innerHTML = "defense turrets: " + defense_turrets;
+	    document.getElementById('defense_turrets').innerHTML = "light turrets: " + defense_turrets;
 	    document.getElementById('income_rate').innerHTML = "income: " + income_rate;
 	    let formatted_balance = accounting.formatMoney(account_balance);
 	    document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
