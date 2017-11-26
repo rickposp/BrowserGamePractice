@@ -6,7 +6,10 @@
 				    	"base_damage" : 2,
 				    	"damage_range" : 10,
 				    	"imminent_base_timer" : 1000 * 60 * 2
-				    }
+				    },
+					"ships" : {
+						"damage" : 1
+					}
 			  },
 			  "economy": {
 			    "small_factory": {
@@ -22,12 +25,14 @@
 			    "light_turret": {
 			      "cost": 200,
 			      "expense_rate": 0.0005,
-			      "counter_rate": 2
+			      "counter_rate": 2,
+			      "health" : 1
 			    },
 			    "heavy_turret": {
 			      "cost": 800,
 			      "expense_rate": .0020,
-			      "counter_rate": 10
+			      "counter_rate": 10,
+			      "health" : 1
 			    }
 			  },
 			  "engine": {
@@ -51,17 +56,14 @@
 	
 	let purchase_types = ["small factory", "big factory", "light turret", "heavy turret"];
 	
-	// game state
-	let heavy_turrets = 0;
-	
 	// calculated display values
-	let income_rate = 0;
+	let display_income_rate = 0;
 	
-	// Time tracking
+	// Time tracking (units are in milliseconds)
 	let ai_base_attack_timer = 1000 * 60 * 2;
 	let ai_attack_timer_range = 1000 * 60 * 5;
-	let ai_attack_timer = ai_base_attack_timer; // milliseconds
-	let ai_attack_cooldown_timer = 1000 * 30;
+	let ai_attack_timer = 1000 * 30
+	let ai_attack_cooldown_timer = 1000 * 10;
 	let timers = [];
 	
 	// event tracking
@@ -195,18 +197,26 @@
 		
 		switch(value){
 			case 'small factory':
-				if(game_state["economy"]["account_balance"] > 100){
+				if(game_state["economy"]["account_balance"] >= game_constants["economy"]["small_factory"]["cost"]){
 					game_state["economy"]["small_factories"] += 1;
-					game_state["economy"]["account_balance"] -= 100;
+					game_state["economy"]["account_balance"] -= game_constants["economy"]["small_factory"]["cost"];
 				}
 				else{
 					highlight_balance();
 				}
 				break;
 			case 'light turret':
-				if(game_state["economy"]["account_balance"] > 200){
+				if(game_state["economy"]["account_balance"] >= game_constants["military"]["light_turret"]["cost"]){
 					game_state["military"]["light_turrets"] += 1;
-					game_state["economy"]["account_balance"] -= 200;
+					game_state["economy"]["account_balance"] -= game_constants["military"]["light_turret"]["cost"];
+				}
+				else{
+					highlight_balance();
+				}
+			case 'heavy turret':
+				if(game_state["economy"]["account_balance"] >= game_constants["military"]["heavy_turret"]["cost"]){
+					game_state["military"]["heavy_turrets"] += 1;
+					game_state["economy"]["account_balance"] -= game_constants["military"]["heavy_turret"]["cost"];
 				}
 				else{
 					highlight_balance();
@@ -246,19 +256,51 @@
 	}
 	
 	function attack(){
-		let damage = Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
-		let uncountered_damage = Math.max(damage - (game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["counter_rate"]), 0);
-		let defense_turret_damage = Math.min(game_state["military"]["light_turrets"], uncountered_damage);
-		let factory_damage = Math.min(game_state["economy"]["small_factories"], uncountered_damage - defense_turret_damage);
-		
-		game_state["military"]["light_turrets"] -= defense_turret_damage;
-		game_state["economy"]["small_factories"] -= factory_damage;
-		
-		console.log("attack did " + damage + " damage");
-		
-		if((game_state["economy"]["small_factories"] == 0) && (uncountered_damage - defense_turret_damage - factory_damage >= 0)){
-			console.log("colony destroyed")
+		let enemy_ships = Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
+		console.log("The enemy attacked with " + enemy_ships + " ships.");
+		let turret_defense = 0;
+		turret_defense += game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["counter_rate"];
+		turret_defense += game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["counter_rate"];
+		let remaining_enemy_ships = enemy_ships - turret_defense;
+		let total_defense_damage = remaining_enemy_ships * game_constants['ai']['ships']['damage'];
+		let total_defense_health = 0;
+		total_defense_health += game_state["military"]["light_turrets"];
+		total_defense_health += game_state["military"]["heavy_turrets"];
+		let light_turret_damage = 0;
+		let heavy_turret_damage = 0;
+		if(total_defense_damage >= total_defense_health){
+			game_state["military"]["light_turrets"] = 0;
+			game_state["military"]["heavy_turrets"] = 0;
+			console.log("defenses wiped out")
 		}
+		else {
+			let light_turret_health = game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["health"];
+			let heavy_turret_health = game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["health"];
+			// this is an inefficient algorithm for distributing the damage randomly across buckets
+			for (i = 0; i < total_defense_damage; i++) { 
+				let light_turrets_bucket_full = (light_turret_damage == light_turret_health);
+				let heavy_turrets_bucket_full = (heavy_turret_damage == heavy_turret_health);
+				if(light_turrets_bucket_full){
+					heavy_turret_damage++;
+				} else if(heavy_turrets_bucket_full){
+					light_turret_damage++;
+				} else {
+					let bucket = Math.round(Math.random());
+					if(bucket == 0){
+						light_turret_damage++;
+					}
+					if(bucket == 1){
+						heavy_turret_damage++;
+					}
+				}
+			}
+			let remaining_light_turret_health = light_turret_health - light_turret_damage;
+			game_state["military"]["light_turrets"] = Math.ceil(remaining_light_turret_health/game_constants["military"]["light_turret"]["health"]);
+			let remaining_heavy_turret_health = heavy_turret_health - heavy_turret_damage;
+			game_state["military"]["heavy_turrets"] = Math.ceil(remaining_heavy_turret_health/game_constants["military"]["heavy_turret"]["health"]);
+		}
+		let total_economy_damage = total_defense_damage - light_turret_damage - heavy_turret_damage;
+		console.log("Damage to economy: " + total_economy_damage);
 	}
 	
 	function attack_imminent_callbck(){
@@ -302,13 +344,16 @@
 	}
 	
 	function account_balance_update(time_elapsed_from_last_update){
-		income_rate = (game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["profit_rate"]) - (game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["expense_rate"]);
+		let income_rate = 0;
+		income_rate += game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["profit_rate"];
+		income_rate -= game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["expense_rate"];
+		income_rate -= game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["expense_rate"];
 		game_state["economy"]["account_balance"] += income_rate * time_elapsed_from_last_update;
+		display_income_rate = income_rate * time_elapsed_from_last_update;
 	}
 	
 	function account_balance_update_callback(){
-		account_balance_update(game_constants["engine"]["account_balance_update_interval"])
-		
+		account_balance_update(game_constants["engine"]["account_balance_update_interval"]);
 		let timer = new GameEngineTimer(game_constants["engine"]["account_balance_update_interval"]);
 		timer.on('end', account_balance_update_callback);
 		timer.start();
@@ -332,8 +377,8 @@
 		
 	    document.getElementById('small_factories').innerHTML = "small factories: " + game_state["economy"]["small_factories"];
 	    document.getElementById('light_turrets').innerHTML = "light turrets: " + game_state["military"]["light_turrets"];
-	    document.getElementById('heavy_turrets').innerHTML = "heavy turrets: " + heavy_turrets;
-	    document.getElementById('income_rate').innerHTML = "income: " + income_rate;
+	    document.getElementById('heavy_turrets').innerHTML = "heavy turrets: " + game_state["military"]["heavy_turrets"];
+	    document.getElementById('income_rate').innerHTML = "income: " + display_income_rate;
 	    let formatted_balance = accounting.formatMoney(game_state["economy"]["account_balance"]);
 	    document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
 	    document.getElementById('fps').innerHTML = MainLoop.getFPS().toFixed(2) + " FPS";
