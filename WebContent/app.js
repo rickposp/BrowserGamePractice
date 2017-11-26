@@ -1,35 +1,71 @@
 (function(){
-	// game constants
-	cost_per_factory = 100; // dollars
-	factory_profit_rate = 0.002; // dollars per second
-	turrent_expense_rate = 0.0005; // dollars per second
-	defense_turret_counter_rate = 2;
-	purchase_types = ["factory", "light turret"];
+	'use strict';
+	let game_constants = {
+			  "ai": {
+				    "attack" : {
+				    	"base_damage" : 2,
+				    	"damage_range" : 10,
+				    	"imminent_base_timer" : 1000 * 60 * 2
+				    }
+			  },
+			  "economy": {
+			    "small_factory": {
+			      "cost": 100,
+			      "profit_rate": .002
+			    },
+			    "big_factory": {
+			      "cost": 400,
+			      "profit_rate": .010
+			    }
+			  },
+			  "military": {
+			    "light_turret": {
+			      "cost": 200,
+			      "expense_rate": 0.0005,
+			      "counter_rate": 2
+			    },
+			    "heavy_turret": {
+			      "cost": 800,
+			      "expense_rate": .0020,
+			      "counter_rate": 10
+			    }
+			  },
+			  "engine": {
+				  "account_balance_update_interval": 1000
+			  }
+			};
+	
+	let game_state = {
+			  "ai": {
+				  },
+			  "economy": {
+			    "account_balance": 200,
+			    "small_factories": 0,
+			    "big_factories": 0
+			  },
+			  "military": {
+			    "light_turrets": 0,
+			    "heavy_turrets": 0
+			  }
+			}
+	
+	let purchase_types = ["small factory", "big factory", "light turret", "heavy turret"];
 	
 	// game state
-	account_balance = 200;
-	defense_turrets = 0;
-	factories = 0;
-	ai_attack_imminent_timer_expired = false;
-	ai_attack_timer_expired = false;
-	ai_attack_cooldown_timer_expired = false;
-	ai_attack_cooldown_active = false;
-	ai_attack_damage_range = 10;
-	ai_attack_damage_base = 2;
+	let heavy_turrets = 0;
 	
 	// calculated display values
-	income_rate = 0;
+	let income_rate = 0;
 	
 	// Time tracking
-	ai_attack_imminent_timer = 1000 * 60 * 2;
-	ai_base_attack_timer = 1000 * 60 * 2;
-	ai_attack_timer_range = 1000 * 60 * 5;
-	ai_attack_timer = ai_base_attack_timer; // milliseconds
-	ai_attack_cooldown_timer = 1000 * 30;
-	timers = [];
+	let ai_base_attack_timer = 1000 * 60 * 2;
+	let ai_attack_timer_range = 1000 * 60 * 5;
+	let ai_attack_timer = ai_base_attack_timer; // milliseconds
+	let ai_attack_cooldown_timer = 1000 * 30;
+	let timers = [];
 	
 	// event tracking
-	user_interface_events = [];
+	let user_interface_events = [];
 	
 	class GameEngineUIEvent {
 		constructor(callback){
@@ -74,10 +110,12 @@
 	  }
 	  
 	  tick(delta){
+		  self = this
+		  self.delta = delta
 		  if(this.running){
 			  if(this.time_remaining <= 0){
 				  this.running = false;
-				  this.callback_end();
+				  this.callback_end(self);
 			  }
 			  else {
 				  this.time_remaining -= delta;
@@ -119,10 +157,15 @@
 	.setDraw(draw)
 	.setEnd(end)
 	
-	let timer = new GameEngineTimer(ai_attack_imminent_timer);
-	timer.on('end', function(){ai_attack_imminent_timer_expired = true});
-	timer.start();
-	register_timer(timer);
+	let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
+	initial_attack_imminent_timer.on('end', attack_imminent_callbck);
+	initial_attack_imminent_timer.start();
+	register_timer(initial_attack_imminent_timer);
+	
+	let initial_account_balance_update_timer = new GameEngineTimer(game_constants["engine"]["account_balance_update_interval"]);
+	initial_account_balance_update_timer.on('end', account_balance_update_callback);
+	initial_account_balance_update_timer.start();
+	register_timer(initial_account_balance_update_timer);	
 	
 	var select = document.getElementById("purchase_selector");
 	for(var i = 0; i < purchase_types.length; i++) {
@@ -151,19 +194,19 @@
 		let value = e.options[e.selectedIndex].value;
 		
 		switch(value){
-			case 'factory':
-				if(account_balance > 100){
-					factories += 1;
-					account_balance -= 100;
+			case 'small factory':
+				if(game_state["economy"]["account_balance"] > 100){
+					game_state["economy"]["small_factories"] += 1;
+					game_state["economy"]["account_balance"] -= 100;
 				}
 				else{
 					highlight_balance();
 				}
 				break;
 			case 'light turret':
-				if(account_balance > 200){
-					defense_turrets += 1;
-					account_balance -= 200;
+				if(game_state["economy"]["account_balance"] > 200){
+					game_state["military"]["light_turrets"] += 1;
+					game_state["economy"]["account_balance"] -= 200;
 				}
 				else{
 					highlight_balance();
@@ -203,72 +246,77 @@
 	}
 	
 	function attack(){
-		let damage = Math.floor((Math.random() * ai_attack_damage_range) + ai_attack_damage_base);
-		let uncountered_damage = Math.max(damage - (defense_turrets * defense_turret_counter_rate), 0);
-		let defense_turret_damage = Math.min(defense_turrets, uncountered_damage);
-		let factory_damage = Math.min(factories, uncountered_damage - defense_turret_damage);
+		let damage = Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
+		let uncountered_damage = Math.max(damage - (game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["counter_rate"]), 0);
+		let defense_turret_damage = Math.min(game_state["military"]["light_turrets"], uncountered_damage);
+		let factory_damage = Math.min(game_state["economy"]["small_factories"], uncountered_damage - defense_turret_damage);
 		
-		defense_turrets -= defense_turret_damage;
-		factories -= factory_damage;
+		game_state["military"]["light_turrets"] -= defense_turret_damage;
+		game_state["economy"]["small_factories"] -= factory_damage;
 		
 		console.log("attack did " + damage + " damage");
 		
-		if((factories == 0) && (uncountered_damage - defense_turret_damage - factory_damage >= 0)){
+		if((game_state["economy"]["small_factories"] == 0) && (uncountered_damage - defense_turret_damage - factory_damage >= 0)){
 			console.log("colony destroyed")
 		}
 	}
 	
+	function attack_imminent_callbck(){
+		console.log("attack imminent timer expired");
+		let timer = new GameEngineTimer(ai_attack_timer);
+		timer.on('end', attack_callback);
+		timer.start();
+		register_timer(timer);
+		let event = new GameEngineUIEvent(function(){
+			let element = document.getElementById('attack_warning')
+			element.innerHTML = 'WARNING! An attack is imminent!';
+			element.style.visibility = 'visible';
+		});
+		register_user_interface_event(event);
+	}
+	
+	function attack_callback(){
+		console.log("attack action timer expired");
+		let timer = new GameEngineTimer(ai_attack_cooldown_timer);
+		timer.on('end', cooldown_callback);
+		timer.start();
+		register_timer(timer);
+		let event = new GameEngineUIEvent(function(){
+			document.getElementById('attack_warning').innerHTML = 'ATTACK';
+		});
+		register_user_interface_event(event);
+	}
+	
+	function cooldown_callback(){
+		console.log("attack cooldown timer expired");
+		attack();
+		let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
+		let timer = new GameEngineTimer(ai_attack_timer_duration);
+		timer.on('end', attack_imminent_callbck);
+		timer.start();
+		register_timer(timer);	
+		let event = new GameEngineUIEvent(function(){
+			document.getElementById('attack_warning').style.visibility = 'hidden';
+		});
+		register_user_interface_event(event);	
+	}
+	
+	function account_balance_update(time_elapsed_from_last_update){
+		income_rate = (game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["profit_rate"]) - (game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["expense_rate"]);
+		game_state["economy"]["account_balance"] += income_rate * time_elapsed_from_last_update;
+	}
+	
+	function account_balance_update_callback(){
+		account_balance_update(game_constants["engine"]["account_balance_update_interval"])
+		
+		let timer = new GameEngineTimer(game_constants["engine"]["account_balance_update_interval"]);
+		timer.on('end', account_balance_update_callback);
+		timer.start();
+		register_timer(timer);	
+	}
+	
 	function update(delta){
 		process_timers(delta);
-		income_rate = (factories * factory_profit_rate) - (defense_turrets * turrent_expense_rate);
-		account_balance += income_rate * delta;
-		
-		if(ai_attack_imminent_timer_expired){
-			console.log("attack imminent timer expired");
-			ai_attack_imminent_timer_expired = false;
-			let timer = new GameEngineTimer(ai_attack_timer);
-			timer.on('end', function(){ai_attack_timer_expired = true});
-			timer.start();
-			register_timer(timer);
-			let event = new GameEngineUIEvent(function(){
-				let element = document.getElementById('attack_warning')
-				element.innerHTML = 'WARNING! An attack is imminent!';
-				element.style.visibility = 'visible';
-			});
-			register_user_interface_event(event);
-		}
-		
-		if(ai_attack_timer_expired){
-			console.log("attack action timer expired");
-			ai_attack_timer_expired = false;
-			let timer = new GameEngineTimer(ai_attack_cooldown_timer);
-			timer.on('end', 
-					function()
-					{
-						ai_attack_cooldown_timer_expired = true; 
-						attack();
-					});
-			timer.start();
-			register_timer(timer);
-			let event = new GameEngineUIEvent(function(){
-				document.getElementById('attack_warning').innerHTML = 'ATTACK';
-			});
-			register_user_interface_event(event);
-		}
-		
-		if(ai_attack_cooldown_timer_expired){
-			console.log("attack cooldown timer expired");
-			ai_attack_cooldown_timer_expired = false;
-			let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
-			let timer = new GameEngineTimer(ai_attack_timer_duration);
-			timer.on('end', function(){ai_attack_imminent_timer_expired = true});
-			timer.start();
-			register_timer(timer);	
-			let event = new GameEngineUIEvent(function(){
-				document.getElementById('attack_warning').style.visibility = 'hidden';
-			});
-			register_user_interface_event(event);
-		}
 	}
 	
 	function process_user_interface_events(){
@@ -282,10 +330,11 @@
 	function draw(delta) {
 		process_user_interface_events();
 		
-	    document.getElementById('factories').innerHTML = "factories: " + factories;
-	    document.getElementById('defense_turrets').innerHTML = "light turrets: " + defense_turrets;
+	    document.getElementById('small_factories').innerHTML = "small factories: " + game_state["economy"]["small_factories"];
+	    document.getElementById('light_turrets').innerHTML = "light turrets: " + game_state["military"]["light_turrets"];
+	    document.getElementById('heavy_turrets').innerHTML = "heavy turrets: " + heavy_turrets;
 	    document.getElementById('income_rate').innerHTML = "income: " + income_rate;
-	    let formatted_balance = accounting.formatMoney(account_balance);
+	    let formatted_balance = accounting.formatMoney(game_state["economy"]["account_balance"]);
 	    document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
 	    document.getElementById('fps').innerHTML = MainLoop.getFPS().toFixed(2) + " FPS";
 	}

@@ -16,26 +16,25 @@ gulp.task('clean', function() {
 });
 
 //Process scripts and concatenate them into one output file
-gulp.task('scripts', ['compile'], function() {
-	 gulp.src(["node_modules/mainloop.js/build/mainloop.min.js", "library/*.js", 'app.js'])
+gulp.task('scripts', function() {
+	 return gulp.src(["node_modules/mainloop.js/build/mainloop.min.js", "library/*.js", 'app.js'])
 	 .pipe(concat('app.min.js'))
 	 .pipe(gulp.dest(dist_folder));
 });
 
 gulp.task('css', ['clean'], function() {
-    gulp.src('./styles.css')
+    return gulp.src('./styles.css')
     .pipe(gulp.dest(dist_folder));
 });
 
 gulp.task('html', ['clean'], function() {
-    gulp.src('./index.html')
+    return gulp.src('./index.html')
     .pipe(gulp.dest(dist_folder));
 });
 
-gulp.task("compile", ['clean'], function () {
-    return tsProject.src()
-        .pipe(tsProject())
-        .js.pipe(gulp.dest(dist_folder));
+gulp.task('browser_reload', ['scripts', 'css', 'html'], function(done){
+	browserSync.reload();
+	done();
 });
 
 // Static server
@@ -47,8 +46,7 @@ gulp.task('serve', ['scripts', 'css', 'html'], function() {
         }
     },
     function() {});
-    gulp.watch(['app.js', 'index.html', 'main.ts', 'styles.css'], ['serve'])
-    	.on('change', browserSync.reload);
+    gulp.watch(['app.js', 'index.html', 'styles.css'], ['browser_reload'])
 });
 
 gulp.task('default', ['scripts', 'html', 'css'])
