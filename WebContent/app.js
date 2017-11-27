@@ -205,6 +205,15 @@
 					highlight_balance();
 				}
 				break;
+			case 'big factory':
+				if(game_state["economy"]["account_balance"] >= game_constants["economy"]["big_factory"]["cost"]){
+					game_state["economy"]["big_factories"] += 1;
+					game_state["economy"]["account_balance"] -= game_constants["economy"]["big_factory"]["cost"];
+				}
+				else{
+					highlight_balance();
+				}
+				break;
 			case 'light turret':
 				if(game_state["economy"]["account_balance"] >= game_constants["military"]["light_turret"]["cost"]){
 					game_state["military"]["light_turrets"] += 1;
@@ -213,6 +222,7 @@
 				else{
 					highlight_balance();
 				}
+				break;
 			case 'heavy turret':
 				if(game_state["economy"]["account_balance"] >= game_constants["military"]["heavy_turret"]["cost"]){
 					game_state["military"]["heavy_turrets"] += 1;
@@ -221,6 +231,7 @@
 				else{
 					highlight_balance();
 				}
+				break;
 		};
 	};
 	
@@ -255,52 +266,67 @@
 		Velocity(e, "reverse", { duration: 1000 });
 	}
 	
-	function attack(){
-		let enemy_ships = Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
-		console.log("The enemy attacked with " + enemy_ships + " ships.");
-		let turret_defense = 0;
-		turret_defense += game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["counter_rate"];
-		turret_defense += game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["counter_rate"];
-		let remaining_enemy_ships = enemy_ships - turret_defense;
-		let total_defense_damage = remaining_enemy_ships * game_constants['ai']['ships']['damage'];
-		let total_defense_health = 0;
-		total_defense_health += game_state["military"]["light_turrets"];
-		total_defense_health += game_state["military"]["heavy_turrets"];
+	function calculate_attack_size(){
+		return Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
+	}
+	
+	function calculate_defense_counter(){
+		let counter = 0;
+		counter += game_constants["military"]["light_turret"]["counter_rate"];
+		counter += game_constants["military"]["heavy_turret"]["counter_rate"];
+		return counter;
+	}
+	
+	function distribute_damage(damage){
 		let light_turret_damage = 0;
 		let heavy_turret_damage = 0;
-		if(total_defense_damage >= total_defense_health){
-			game_state["military"]["light_turrets"] = 0;
-			game_state["military"]["heavy_turrets"] = 0;
-			console.log("defenses wiped out")
-		}
-		else {
-			let light_turret_health = game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["health"];
-			let heavy_turret_health = game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["health"];
-			// this is an inefficient algorithm for distributing the damage randomly across buckets
-			for (i = 0; i < total_defense_damage; i++) { 
-				let light_turrets_bucket_full = (light_turret_damage == light_turret_health);
-				let heavy_turrets_bucket_full = (heavy_turret_damage == heavy_turret_health);
-				if(light_turrets_bucket_full){
-					heavy_turret_damage++;
-				} else if(heavy_turrets_bucket_full){
-					light_turret_damage++;
-				} else {
-					let bucket = Math.round(Math.random());
-					if(bucket == 0){
-						light_turret_damage++;
-					}
-					if(bucket == 1){
-						heavy_turret_damage++;
-					}
-				}
+		// this is an inefficient algorithm for distributing the damage randomly across buckets
+		for (i = 0; i < damage; i++) { 
+			let light_turrets_bucket_full = (light_turret_damage >= light_turret_health);
+			let heavy_turrets_bucket_full = (heavy_turret_damage >= heavy_turret_health);
+
+			let bucket = Math.round(Math.random());
+			if(bucket == 0){
+				light_turret_damage++;
 			}
-			let remaining_light_turret_health = light_turret_health - light_turret_damage;
-			game_state["military"]["light_turrets"] = Math.ceil(remaining_light_turret_health/game_constants["military"]["light_turret"]["health"]);
-			let remaining_heavy_turret_health = heavy_turret_health - heavy_turret_damage;
-			game_state["military"]["heavy_turrets"] = Math.ceil(remaining_heavy_turret_health/game_constants["military"]["heavy_turret"]["health"]);
+			else{
+				heavy_turret_damage++;
+			}
 		}
-		let total_economy_damage = total_defense_damage - light_turret_damage - heavy_turret_damage;
+		return {
+			"light_turret_damage" : light_turret_damage,
+			"heavy_turret_damage" : heavy_turret_damage
+		}
+	}
+	
+	function attack(){
+		let enemy_ships = calculate_attack_size();
+		console.log("The enemy attacked with " + enemy_ships + " ships.");
+		let remaining_enemy_ships = enemy_ships - calculate_defense_counter();
+		let total_defense_damage = remaining_enemy_ships * game_constants['ai']['ships']['damage'];
+
+		let light_turret_health = game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["health"];
+		let heavy_turret_health = game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["health"];
+		let total_defense_health = 0;
+		total_defense_health += light_turret_health;
+		total_defense_health += heavy_turret_health;
+		
+		let distribution = distribute_damage(total_defense_damage);
+		console.log("light turret damage: " + distribution['light_turret_damage']);
+		console.log("heavy turret damage: " + distribution['heavy_turret_damage']);
+
+		let remaining_light_turret_health = light_turret_health - distribution['light_turret_damage'];
+		game_state["military"]["light_turrets"] = Math.ceil(remaining_light_turret_health/game_constants["military"]["light_turret"]["health"]);
+		let remaining_heavy_turret_health = heavy_turret_health - distribution['heavy_turret_damage'];
+		game_state["military"]["heavy_turrets"] = Math.ceil(remaining_heavy_turret_health/game_constants["military"]["heavy_turret"]["health"]);
+
+		let total_economy_damage = total_defense_damage - distribution['light_turret_damage'] - distribution['heavy_turret_damage'];
 		console.log("Damage to economy: " + total_economy_damage);
+		
+		if((game_state["military"]["light_turrets"] == 0) &&
+		   (game_state["military"]["heavy_turrets"] == 0)){
+			console.log("defenses overwhelmed");
+		}
 	}
 	
 	function attack_imminent_callbck(){
@@ -346,6 +372,7 @@
 	function account_balance_update(time_elapsed_from_last_update){
 		let income_rate = 0;
 		income_rate += game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["profit_rate"];
+		income_rate += game_state["economy"]["big_factories"] * game_constants["economy"]["big_factory"]["profit_rate"];
 		income_rate -= game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["expense_rate"];
 		income_rate -= game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["expense_rate"];
 		game_state["economy"]["account_balance"] += income_rate * time_elapsed_from_last_update;
@@ -376,6 +403,7 @@
 		process_user_interface_events();
 		
 	    document.getElementById('small_factories').innerHTML = "small factories: " + game_state["economy"]["small_factories"];
+	    document.getElementById('big_factories').innerHTML = "big factories: " + game_state["economy"]["big_factories"];
 	    document.getElementById('light_turrets').innerHTML = "light turrets: " + game_state["military"]["light_turrets"];
 	    document.getElementById('heavy_turrets').innerHTML = "heavy turrets: " + game_state["military"]["heavy_turrets"];
 	    document.getElementById('income_rate').innerHTML = "income: " + display_income_rate;
