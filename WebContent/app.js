@@ -272,18 +272,31 @@
 	
 	function calculate_defense_counter(){
 		let counter = 0;
-		counter += game_constants["military"]["light_turret"]["counter_rate"];
-		counter += game_constants["military"]["heavy_turret"]["counter_rate"];
+		counter += game_constants["military"]["light_turret"]["counter_rate"] * game_state["military"]["light_turrets"];
+		counter += game_constants["military"]["heavy_turret"]["counter_rate"] * game_state["military"]["heavy_turrets"];
 		return counter;
 	}
 	
-	function distribute_damage(damage){
+	function distribute_damage(damage, light_turret_health, heavy_turret_health){
+		if(damage > light_turret_health + heavy_turret_health){
+			throw "too much damage to distribute";
+		}
 		let light_turret_damage = 0;
 		let heavy_turret_damage = 0;
 		// this is an inefficient algorithm for distributing the damage randomly across buckets
-		for (i = 0; i < damage; i++) { 
+		for (i = damage; i > 0; i--) { 
 			let light_turrets_bucket_full = (light_turret_damage >= light_turret_health);
 			let heavy_turrets_bucket_full = (heavy_turret_damage >= heavy_turret_health);
+			
+			if(light_turrets_bucket_full){
+				heavy_turret_damage += damage;
+				break;
+			}
+			
+			if(heavy_turrets_bucket_full){
+				light_turrent_damage += damage;
+				break;
+			}
 
 			let bucket = Math.round(Math.random());
 			if(bucket == 0){
@@ -302,7 +315,8 @@
 	function attack(){
 		let enemy_ships = calculate_attack_size();
 		console.log("The enemy attacked with " + enemy_ships + " ships.");
-		let remaining_enemy_ships = enemy_ships - calculate_defense_counter();
+		let remaining_enemy_ships = Math.max(enemy_ships - calculate_defense_counter(), 0);
+		console.log(remaining_enemy_ships + " ships remaining");
 		let total_defense_damage = remaining_enemy_ships * game_constants['ai']['ships']['damage'];
 
 		let light_turret_health = game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["health"];
@@ -311,16 +325,26 @@
 		total_defense_health += light_turret_health;
 		total_defense_health += heavy_turret_health;
 		
-		let distribution = distribute_damage(total_defense_damage);
-		console.log("light turret damage: " + distribution['light_turret_damage']);
-		console.log("heavy turret damage: " + distribution['heavy_turret_damage']);
-
-		let remaining_light_turret_health = light_turret_health - distribution['light_turret_damage'];
+		let light_turret_damage = 0;
+		let heavy_turret_damage = 0;
+		if(total_defense_damage > total_defense_health){
+			light_turret_damage = light_turret_health;
+			heavy_turret_damage = heavy_turret_health;
+		}
+		else {
+			let distribution = distribute_damage(total_defense_damage, light_turret_health, heavy_turret_health);
+			light_turret_damage = distribution['light_turret_damage'];
+			heavy_turret_damage = distribution['heavy_turret_damage'];
+			console.log("light turret damage: " + light_turret_damage);
+			console.log("heavy turret damage: " + heavy_turret_damage);
+		}
+		
+		let remaining_light_turret_health = light_turret_health - light_turret_damage;
+		let remaining_heavy_turret_health = heavy_turret_health - heavy_turret_damage;
 		game_state["military"]["light_turrets"] = Math.ceil(remaining_light_turret_health/game_constants["military"]["light_turret"]["health"]);
-		let remaining_heavy_turret_health = heavy_turret_health - distribution['heavy_turret_damage'];
 		game_state["military"]["heavy_turrets"] = Math.ceil(remaining_heavy_turret_health/game_constants["military"]["heavy_turret"]["health"]);
 
-		let total_economy_damage = total_defense_damage - distribution['light_turret_damage'] - distribution['heavy_turret_damage'];
+		let total_economy_damage = total_defense_damage - light_turret_damage - heavy_turret_damage;
 		console.log("Damage to economy: " + total_economy_damage);
 		
 		if((game_state["military"]["light_turrets"] == 0) &&
