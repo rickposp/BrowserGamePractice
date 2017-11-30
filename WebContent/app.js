@@ -17,7 +17,7 @@
 			      "profit_rate": .002,
 			      "health" : 1
 			    },
-			    "big_factory": {
+			    "large_factory": {
 			      "cost": 400,
 			      "profit_rate": .010,
 			      "health" : 1
@@ -48,7 +48,7 @@
 			  "economy": {
 			    "account_balance": 200,
 			    "small_factories": 0,
-			    "big_factories": 0
+			    "large_factories": 0
 			  },
 			  "military": {
 			    "light_turrets": 0,
@@ -171,14 +171,6 @@
 	initial_account_balance_update_timer.start();
 	register_timer(initial_account_balance_update_timer);	
 	
-	var select = document.getElementById("purchase_selector");
-	for(var i = 0; i < purchase_types.length; i++) {
-		let opt = document.createElement("option");
-		opt.value = purchase_types[i];
-		opt.textContent = purchase_types[i];
-		select.appendChild(opt);
-	}
-	
 	document.getElementById("start").onclick = function () { 
 		// changing the UI directly here to control the main loop
 		document.getElementById('start').style.visibility  = 'hidden';
@@ -193,48 +185,44 @@
 		document.getElementById('start').style.visibility  = 'visible';
 	};
 	
-	document.getElementById("buy").onclick = function () {
-		let e = document.getElementById('purchase_selector');
-		let value = e.options[e.selectedIndex].value;
-		
-		switch(value){
-			case 'small factory':
-				if(game_state["economy"]["account_balance"] >= game_constants["economy"]["small_factory"]["cost"]){
-					game_state["economy"]["small_factories"] += 1;
-					game_state["economy"]["account_balance"] -= game_constants["economy"]["small_factory"]["cost"];
-				}
-				else{
-					highlight_balance();
-				}
-				break;
-			case 'big factory':
-				if(game_state["economy"]["account_balance"] >= game_constants["economy"]["big_factory"]["cost"]){
-					game_state["economy"]["big_factories"] += 1;
-					game_state["economy"]["account_balance"] -= game_constants["economy"]["big_factory"]["cost"];
-				}
-				else{
-					highlight_balance();
-				}
-				break;
-			case 'light turret':
-				if(game_state["economy"]["account_balance"] >= game_constants["military"]["light_turret"]["cost"]){
-					game_state["military"]["light_turrets"] += 1;
-					game_state["economy"]["account_balance"] -= game_constants["military"]["light_turret"]["cost"];
-				}
-				else{
-					highlight_balance();
-				}
-				break;
-			case 'heavy turret':
-				if(game_state["economy"]["account_balance"] >= game_constants["military"]["heavy_turret"]["cost"]){
-					game_state["military"]["heavy_turrets"] += 1;
-					game_state["economy"]["account_balance"] -= game_constants["military"]["heavy_turret"]["cost"];
-				}
-				else{
-					highlight_balance();
-				}
-				break;
-		};
+	document.getElementById("buy_small_factory").onclick = function () {
+		if(game_state["economy"]["account_balance"] >= game_constants["economy"]["small_factory"]["cost"]){
+			game_state["economy"]["small_factories"] += 1;
+			game_state["economy"]["account_balance"] -= game_constants["economy"]["small_factory"]["cost"];
+		}
+		else{
+			highlight_balance();
+		}
+	};
+	
+	document.getElementById("buy_large_factory").onclick = function () {
+		if(game_state["economy"]["account_balance"] >= game_constants["economy"]["large_factory"]["cost"]){
+			game_state["economy"]["large_factories"] += 1;
+			game_state["economy"]["account_balance"] -= game_constants["economy"]["large_factory"]["cost"];
+		}
+		else{
+			highlight_balance();
+		}
+	};
+	
+	document.getElementById("buy_light_turret").onclick = function () {
+		if(game_state["economy"]["account_balance"] >= game_constants["military"]["light_turret"]["cost"]){
+			game_state["military"]["light_turrets"] += 1;
+			game_state["economy"]["account_balance"] -= game_constants["military"]["light_turret"]["cost"];
+		}
+		else{
+			highlight_balance();
+		}
+	};
+	
+	document.getElementById("buy_heavy_turret").onclick = function () {
+		if(game_state["economy"]["account_balance"] >= game_constants["military"]["heavy_turret"]["cost"]){
+			game_state["military"]["heavy_turrets"] += 1;
+			game_state["economy"]["account_balance"] -= game_constants["military"]["heavy_turret"]["cost"];
+		}
+		else{
+			highlight_balance();
+		}
 	};
 	
 	function register_user_interface_event(event){
@@ -286,7 +274,7 @@
 		let light_turret_damage = 0;
 		let heavy_turret_damage = 0;
 		// this is an inefficient algorithm for distributing the damage randomly across buckets
-		for (i = damage; i > 0; i--) { 
+		for (let i = damage; i > 0; i--) { 
 			let light_turrets_bucket_full = (light_turret_damage >= light_turret_health);
 			let heavy_turrets_bucket_full = (heavy_turret_damage >= heavy_turret_health);
 			
@@ -314,19 +302,19 @@
 		}
 	}
 	
-	function distribute_factory_damage(damage, small_factory_health, big_factory_health){
-		if(damage > small_factory_health + big_factory_health){
+	function distribute_factory_damage(damage, small_factory_health, large_factory_health){
+		if(damage > small_factory_health + large_factory_health){
 			throw "too much damage to distribute";
 		}
 		let small_factory_damage = 0;
-		let big_factory_damage = 0;
+		let large_factory_damage = 0;
 		// this is an inefficient algorithm for distributing the damage randomly across buckets
 		for (i = damage; i > 0; i--) { 
 			let small_factory_bucket_full = (small_factory_damage >= small_factory_health);
-			let large_factory_bucket_full = (big_factory_damage >= big_factory_health);
+			let large_factory_bucket_full = (large_factory_damage >= large_factory_health);
 			
 			if(small_factory_bucket_full){
-				big_factory_damage += damage;
+				large_factory_damage += damage;
 				break;
 			}
 			
@@ -340,12 +328,12 @@
 				small_factory_damage++;
 			}
 			else{
-				big_factory_damage++;
+				large_factory_damage++;
 			}
 		}
 		return {
 			"small_factory_damage" : small_factory_damage,
-			"big_factory_damage" : big_factory_damage
+			"large_factory_damage" : large_factory_damage
 		}
 	}
 	
@@ -388,32 +376,32 @@
 			console.log("Damage to economy: " + total_economy_damage);
 			
 			let small_factory_health = game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["health"];
-			let big_factory_health = game_state["economy"]["big_factories"] * game_constants["economy"]["big_factory"]["health"];
+			let large_factory_health = game_state["economy"]["large_factories"] * game_constants["economy"]["large_factory"]["health"];
 			let total_economy_health = 0;
 			total_economy_health += small_factory_health;
-			total_economy_health += big_factory_health;
+			total_economy_health += large_factory_health;
 			
 			let small_factory_damage = 0;
-			let big_factory_damage = 0;
+			let large_factory_damage = 0;
 			if(total_economy_damage > total_economy_health){
 				small_factory_damage = small_factory_health;
-				big_factory_damage = big_factory_health;
+				large_factory_damage = large_factory_health;
 			}
 			else{
-				let distribution = distribute_factory_damage(total_economy_damage, small_factory_health, big_factory_health);
+				let distribution = distribute_factory_damage(total_economy_damage, small_factory_health, large_factory_health);
 				small_factory_damage = distribution['small_factory_damage'];
-				big_factory_damage = distribution['big_factory_damage'];
+				large_factory_damage = distribution['large_factory_damage'];
 			}
 			console.log("small factory damage: " + small_factory_damage);
-			console.log("big factory damage: " + big_factory_damage);
+			console.log("big factory damage: " + large_factory_damage);
 			
 			let remaining_small_factory_health = small_factory_health - small_factory_damage;
-			let remaining_big_factory_health = big_factory_health - big_factory_damage;
+			let remaining_large_factory_health = large_factory_health - large_factory_damage;
 			game_state["economy"]["small_factories"] = Math.ceil(remaining_small_factory_health/game_constants["economy"]["small_factory"]["health"]);
-			game_state["economy"]["big_factories"] = Math.ceil(remaining_big_factory_health/game_constants["economy"]["big_factory"]["health"]);
+			game_state["economy"]["large_factories"] = Math.ceil(remaining_large_factory_health/game_constants["economy"]["large_factory"]["health"]);
 			
 			if((game_state['economy']['small_factories'] == 0) &&
-			   (game_state['economy']['big_factories'] == 0)){
+			   (game_state['economy']['large_factories'] == 0)){
 				console.log("economy destroyed");
 				if(game_state['economy']['account_balance'] < game_constants["military"]["light_turret"]["cost"]){
 					console.log("game lost");
@@ -466,7 +454,7 @@
 	function account_balance_update(time_elapsed_from_last_update){
 		let income_rate = 0;
 		income_rate += game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["profit_rate"];
-		income_rate += game_state["economy"]["big_factories"] * game_constants["economy"]["big_factory"]["profit_rate"];
+		income_rate += game_state["economy"]["large_factories"] * game_constants["economy"]["large_factory"]["profit_rate"];
 		income_rate -= game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["expense_rate"];
 		income_rate -= game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["expense_rate"];
 		game_state["economy"]["account_balance"] += income_rate * time_elapsed_from_last_update;
@@ -497,7 +485,7 @@
 		process_user_interface_events();
 		
 	    document.getElementById('small_factories').innerHTML = "small factories: " + game_state["economy"]["small_factories"];
-	    document.getElementById('big_factories').innerHTML = "big factories: " + game_state["economy"]["big_factories"];
+	    document.getElementById('large_factories').innerHTML = "large factories: " + game_state["economy"]["large_factories"];
 	    document.getElementById('light_turrets').innerHTML = "light turrets: " + game_state["military"]["light_turrets"];
 	    document.getElementById('heavy_turrets').innerHTML = "heavy turrets: " + game_state["military"]["heavy_turrets"];
 	    document.getElementById('income_rate').innerHTML = "income: " + display_income_rate;

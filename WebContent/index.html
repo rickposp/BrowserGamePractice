@@ -10,24 +10,33 @@
 <body>
 	<div id="game_pane">
 		<div id="game_toggle">
-			<button type="button" id="start">Start</button>
-			<button type="button" id="stop">Stop</button>
+			<button type="button" class="game_control" id="start">Start</button>
+			<button type="button" class="game_control" id="stop">Stop</button>
 		</div>
-		<div id="purchase_menu">
-			<button type="button" id="buy">Buy</button>
-			<select id="purchase_selector"></select>
+		<div id="alert_bar">
 			<p id="attack_warning"></p>
 		</div>
-		<div id="economy_display_pane">
-			<p id="big_factories"></p>
-			<p id="small_factories"></p>
-			<p id="income_rate"></p>
-			<p id="account_balance"></p>
-			<p id="fps"></p>
+		<div id="animation_pane">
 		</div>
-		<div id="military_display_pane">
-			<p id="light_turrets"></p>
-			<p id="heavy_turrets"></p>
+		<div id="purchase_pane">
+			<button type="button" class="purchase_button" id="buy_small_factory"></button>
+			<button type="button" class="purchase_button" id="buy_large_factory"></button>
+			<div class="spacer"></div>
+			<button type="button" class="purchase_button" id="buy_light_turret"></button>
+			<button type="button" class="purchase_button" id="buy_heavy_turret"></button>
+		</div>
+		<div id="information_pane">
+			<div id="economy_display_pane">
+				<p id="large_factories"></p>
+				<p id="small_factories"></p>
+				<p id="income_rate"></p>
+				<p id="account_balance"></p>
+				<p id="fps"></p>
+			</div>
+			<div id="military_display_pane">
+				<p id="light_turrets"></p>
+				<p id="heavy_turrets"></p>
+			</div>
 		</div>
 	</div>
 </body>

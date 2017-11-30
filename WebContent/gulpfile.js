@@ -15,6 +15,11 @@ gulp.task('clean', function() {
 	.pipe(clean());
 });
 
+gulp.task('images', ['clean'], function() {
+	return gulp.src("img/*.png")
+	.pipe(gulp.dest(dist_folder));
+});
+
 //Process scripts and concatenate them into one output file
 gulp.task('scripts', function() {
 	 return gulp.src(["node_modules/mainloop.js/build/mainloop.min.js", "library/*.js", 'app.js'])
@@ -32,14 +37,14 @@ gulp.task('html', ['clean'], function() {
     .pipe(gulp.dest(dist_folder));
 });
 
-gulp.task('browser_reload', ['scripts', 'css', 'html'], function(done){
+gulp.task('browser_reload', ['scripts', 'css', 'html', "images"], function(done){
 	browserSync.reload();
 	done();
 });
 
 // Static server
 // passing in an empty function to the init function to appease the error message
-gulp.task('serve', ['scripts', 'css', 'html'], function() {
+gulp.task('serve', ['scripts', 'css', 'html', "images"], function() {
     browserSync.init({
         server: {
             baseDir: dist_folder
@@ -49,4 +54,4 @@ gulp.task('serve', ['scripts', 'css', 'html'], function() {
     gulp.watch(['app.js', 'index.html', 'styles.css'], ['browser_reload'])
 });
 
-gulp.task('default', ['scripts', 'html', 'css'])
+gulp.task('default', ['scripts', 'html', 'css', "images"])

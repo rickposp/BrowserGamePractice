@@ -1,5 +1,6 @@
-#start {
-    background-color: #008CBA; /* Blue */
+.game_control{
+	float: left;
+	background-color: #5BC0BE; /* Blue */
     border: none;
     color: white;
     text-align: center;
@@ -12,43 +13,63 @@
 }
 
 #stop {
-    background-color: #008CBA; /* Blue */
-    border: none;
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: medium;
     visibility: hidden;
-    width: 8em;
-    height: 2em;
 }
 
-#buy{
-	background-color: #008CBA; /* Blue */
-    border: none;
-    color: white;
-    text-align: center;
-    text-decoration: none;
+.purchase_button{
+	float: left;
+	border: 2px solid #6FFFE9;
     display: inline-block;
     font-size: medium;
     visibility: visible;
-    width: 8em;
-    height: 2em;
+    width: 4em;
+    height: 4em;
+    cursor: pointer;
+}
+
+#buy_small_factory{
+    background: url(factory_icon.png) no-repeat;
+    background-size: 100%;
+}
+
+#buy_large_factory{
+    background: url(factory_icon.png) no-repeat;
+    background-size: 100%;
+}
+
+#buy_light_turret{
+    background: url(crossed_cannons.png) no-repeat;
+    background-size: 100%;
+}
+
+#buy_heavy_turret{
+    background: url(crossed_cannons.png) no-repeat;
+    background-size: 100%;
 }
 
 body{
 	display: block;
 	margin: 0px;
+	background: #3A506B;
+}
+
+p{
+	color: white
 }
 
 #game_toggle{
 	margin: 0.2em;
 }
 
-#purchase_menu{
+#purchase_pane{
+	margin: 0.2em;
+	clear: both;
+}
+
+#alert_bar{
 	padding-top: 0.4em;
 	margin: 0.2em;
+	clear: both;
 }
 
 #game_pane{
@@ -56,16 +77,42 @@ body{
 }
 
 #economy_display_pane{
+	width: 320px;
+	padding: 0.4em;
 	margin: 0.2em;
 	float: left;
+	background: #0B132B;
 }
 
 #military_display_pane{
+	width: 320px;
+	padding: 0.4em;
 	margin: 0.2em;
 	float: left;
+	background: #0B132B;
+}
+
+#animation_pane{
+	background: black;
+	width: 640px;
+    height: 480px;
+    margin: 0.2em;
+    clear: both;
+}
+
+#information_pane{
+	margin: 0.2em;
+	clear: both;
 }
 
 #attack_warning{
 	color: red;
 	visibility: hidden;
+}
+
+.spacer{
+	width: 1em;
+	height: 4em;
+	float: left;
+	background: black;
 }
