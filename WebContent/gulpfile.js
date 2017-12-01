@@ -4,6 +4,7 @@ var concat = require('gulp-concat');
 var ts = require("gulp-typescript");
 var clean = require('gulp-clean');
 var uglify = require('gulp-uglify');
+var jest = require('gulp-jest').default;
 
 var tsProject = ts.createProject("tsconfig.json");
 
@@ -35,6 +36,13 @@ gulp.task('css', ['clean'], function() {
 gulp.task('html', ['clean'], function() {
     return gulp.src('./index.html')
     .pipe(gulp.dest(dist_folder));
+});
+
+gulp.task('jest', function () {
+	  return gulp.src('app.test.js')
+	  .pipe(jest({
+	    "automock": false
+	  }));
 });
 
 gulp.task('browser_reload', ['scripts', 'css', 'html', "images"], function(done){

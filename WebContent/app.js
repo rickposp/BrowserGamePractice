@@ -156,21 +156,6 @@
 	
 	}
 	
-	MainLoop
-	.setUpdate(update)
-	.setDraw(draw)
-	.setEnd(end)
-	
-	let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
-	initial_attack_imminent_timer.on('end', attack_imminent_callbck);
-	initial_attack_imminent_timer.start();
-	register_timer(initial_attack_imminent_timer);
-	
-	let initial_account_balance_update_timer = new GameEngineTimer(game_constants["engine"]["account_balance_update_interval"]);
-	initial_account_balance_update_timer.on('end', account_balance_update_callback);
-	initial_account_balance_update_timer.start();
-	register_timer(initial_account_balance_update_timer);	
-	
 	document.getElementById("start").onclick = function () { 
 		// changing the UI directly here to control the main loop
 		document.getElementById('start').style.visibility  = 'hidden';
@@ -224,6 +209,23 @@
 			highlight_balance();
 		}
 	};
+	
+	function initialize_game(){
+		MainLoop
+		.setUpdate(update)
+		.setDraw(draw)
+		.setEnd(end)
+		
+		let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
+		initial_attack_imminent_timer.on('end', attack_imminent_callbck);
+		initial_attack_imminent_timer.start();
+		register_timer(initial_attack_imminent_timer);
+		
+		let initial_account_balance_update_timer = new GameEngineTimer(game_constants["engine"]["account_balance_update_interval"]);
+		initial_account_balance_update_timer.on('end', account_balance_update_callback);
+		initial_account_balance_update_timer.start();
+		register_timer(initial_account_balance_update_timer);	
+	}
 	
 	function register_user_interface_event(event){
 		user_interface_events.push(event);
@@ -499,4 +501,6 @@
 			alert("Panic! The simulation has fallen too far behind.");
 		}
 	}
+	
+	initialize_game()
 })();
