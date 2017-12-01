@@ -1,4 +1,5 @@
 .game_control{
+	margin-top: 1em;
 	float: left;
 	background-color: #5BC0BE; /* Blue */
     border: none;
@@ -79,9 +80,10 @@ p{
 
 
 #alert_bar{
-	padding-top: 0.4em;
-	margin: 0.2em;
+	width: 90%;
+	margin: auto;
 	clear: both;
+	min-height: 3em;
 }
 
 #game_pane{
@@ -121,6 +123,8 @@ p{
 #attack_warning{
 	color: red;
 	visibility: hidden;
+	text-align: center;
+	float: left;
 }
 
 #purchase_panes{
