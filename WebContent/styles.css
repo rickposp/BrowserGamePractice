@@ -132,3 +132,7 @@ p{
 	margin: auto;
 	clear: both;
 }
+
+.info_text{
+	padding-left: .4em;
+}
