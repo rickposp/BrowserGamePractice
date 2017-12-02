@@ -4,12 +4,14 @@ var concat = require('gulp-concat');
 var clean = require('gulp-clean');
 var uglify = require('gulp-uglify');
 
-dist_folder = './dist';
-dist_scripts = dist_folder + '/scripts';
-src_scripts = './scripts';
-src_specs = src_scripts + '/spec';
+import plugin from 'gulp-jest-cli';
 
-code_processing_tasks = ['html', 'css', "images", 'main_scripts'];
+let dist_folder = './dist';
+let dist_scripts = dist_folder + '/scripts';
+let src_scripts = './scripts';
+let src_specs = src_scripts + '/spec';
+
+let code_processing_tasks = ['html', 'css', "images", 'main_scripts'];
 
 //Delete the dist directory
 gulp.task('clean', function() {
@@ -41,6 +43,14 @@ gulp.task('browser_reload', code_processing_tasks, function(done){
 	browserSync.reload();
 	done();
 });
+
+gulp.task('test', () => gulp
+  .src(src_specs)
+  .pipe(plugin({
+    coverage: true,
+    onlyChanged: true,
+  }))
+);
 
 // Static server
 // passing in an empty function to the init function to appease the error message

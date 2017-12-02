@@ -20,7 +20,7 @@ export default function (name, limit) {
     		_points += points;
     	}
     	
-    	_name = name;
-    	_limit = limit;
-    	_points = 0;
+    	let _name = name;
+    	let _limit = limit;
+    	let _points = 0;
     }
