@@ -1,5 +1,5 @@
-define(['accounting', 'velocity', 'mainloop', 'modules/game_engine_timer', 'modules/game_engine_ui_event'], 
-function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent){
+define(['accounting', 'velocity', 'mainloop', 'modules/game_engine_timer', 'modules/game_engine_ui_event', 'modules/ai_attack'], 
+function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent, AIAttack){
 	return function Game(){
 			'use strict';
 			let game_constants = {
@@ -175,161 +175,6 @@ function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent){
 				Velocity(e, "reverse", { duration: 1000 });
 			}
 			
-			function calculate_attack_size(){
-				return Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
-			}
-			
-			function calculate_defense_counter(){
-				let counter = 0;
-				counter += game_constants["military"]["light_turret"]["counter_rate"] * game_state["military"]["light_turrets"];
-				counter += game_constants["military"]["heavy_turret"]["counter_rate"] * game_state["military"]["heavy_turrets"];
-				return counter;
-			}
-			
-			function distribute_turret_damage(damage, light_turret_health, heavy_turret_health){
-				if(damage > light_turret_health + heavy_turret_health){
-					throw "too much damage to distribute";
-				}
-				let light_turret_damage = 0;
-				let heavy_turret_damage = 0;
-				// this is an inefficient algorithm for distributing the damage randomly across buckets
-				for (let i = damage; i > 0; i--) { 
-					let light_turrets_bucket_full = (light_turret_damage >= light_turret_health);
-					let heavy_turrets_bucket_full = (heavy_turret_damage >= heavy_turret_health);
-					
-					if(light_turrets_bucket_full){
-						heavy_turret_damage += damage;
-						break;
-					}
-					
-					if(heavy_turrets_bucket_full){
-						light_turret_damage += damage;
-						break;
-					}
-
-					let bucket = Math.round(Math.random());
-					if(bucket == 0){
-						light_turret_damage++;
-					}
-					else{
-						heavy_turret_damage++;
-					}
-				}
-				return {
-					"light_turret_damage" : light_turret_damage,
-					"heavy_turret_damage" : heavy_turret_damage
-				}
-			}
-			
-			function distribute_factory_damage(damage, small_factory_health, large_factory_health){
-				if(damage > small_factory_health + large_factory_health){
-					throw "too much damage to distribute";
-				}
-				let small_factory_damage = 0;
-				let large_factory_damage = 0;
-				// this is an inefficient algorithm for distributing the damage randomly across buckets
-				for (i = damage; i > 0; i--) { 
-					let small_factory_bucket_full = (small_factory_damage >= small_factory_health);
-					let large_factory_bucket_full = (large_factory_damage >= large_factory_health);
-					
-					if(small_factory_bucket_full){
-						large_factory_damage += damage;
-						break;
-					}
-					
-					if(large_factory_bucket_full){
-						small_factory_damage += damage;
-						break;
-					}
-
-					let bucket = Math.round(Math.random());
-					if(bucket == 0){
-						small_factory_damage++;
-					}
-					else{
-						large_factory_damage++;
-					}
-				}
-				return {
-					"small_factory_damage" : small_factory_damage,
-					"large_factory_damage" : large_factory_damage
-				}
-			}
-			
-			function attack(){
-				let enemy_ships = calculate_attack_size();
-				console.log("The enemy attacked with " + enemy_ships + " ships.");
-				let remaining_enemy_ships = Math.max(enemy_ships - calculate_defense_counter(), 0);
-				console.log(remaining_enemy_ships + " ships remaining");
-				let total_defense_damage = remaining_enemy_ships * game_constants['ai']['ships']['damage'];
-
-				let light_turret_health = game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["health"];
-				let heavy_turret_health = game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["health"];
-				let total_defense_health = 0;
-				total_defense_health += light_turret_health;
-				total_defense_health += heavy_turret_health;
-				
-				let light_turret_damage = 0;
-				let heavy_turret_damage = 0;
-				if(total_defense_damage > total_defense_health){
-					light_turret_damage = light_turret_health;
-					heavy_turret_damage = heavy_turret_health;
-				}
-				else {
-					let distribution = distribute_turret_damage(total_defense_damage, light_turret_health, heavy_turret_health);
-					light_turret_damage = distribution['light_turret_damage'];
-					heavy_turret_damage = distribution['heavy_turret_damage'];
-				}
-				console.log("light turret damage: " + light_turret_damage);
-				console.log("heavy turret damage: " + heavy_turret_damage);
-				
-				let remaining_light_turret_health = light_turret_health - light_turret_damage;
-				let remaining_heavy_turret_health = heavy_turret_health - heavy_turret_damage;
-				game_state["military"]["light_turrets"] = Math.ceil(remaining_light_turret_health/game_constants["military"]["light_turret"]["health"]);
-				game_state["military"]["heavy_turrets"] = Math.ceil(remaining_heavy_turret_health/game_constants["military"]["heavy_turret"]["health"]);
-				
-				if((game_state["military"]["light_turrets"] == 0) &&
-				   (game_state["military"]["heavy_turrets"] == 0)){
-					console.log("defenses overwhelmed");
-					let total_economy_damage = total_defense_damage - light_turret_damage - heavy_turret_damage;
-					console.log("Damage to economy: " + total_economy_damage);
-					
-					let small_factory_health = game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["health"];
-					let large_factory_health = game_state["economy"]["large_factories"] * game_constants["economy"]["large_factory"]["health"];
-					let total_economy_health = 0;
-					total_economy_health += small_factory_health;
-					total_economy_health += large_factory_health;
-					
-					let small_factory_damage = 0;
-					let large_factory_damage = 0;
-					if(total_economy_damage > total_economy_health){
-						small_factory_damage = small_factory_health;
-						large_factory_damage = large_factory_health;
-					}
-					else{
-						let distribution = distribute_factory_damage(total_economy_damage, small_factory_health, large_factory_health);
-						small_factory_damage = distribution['small_factory_damage'];
-						large_factory_damage = distribution['large_factory_damage'];
-					}
-					console.log("small factory damage: " + small_factory_damage);
-					console.log("big factory damage: " + large_factory_damage);
-					
-					let remaining_small_factory_health = small_factory_health - small_factory_damage;
-					let remaining_large_factory_health = large_factory_health - large_factory_damage;
-					game_state["economy"]["small_factories"] = Math.ceil(remaining_small_factory_health/game_constants["economy"]["small_factory"]["health"]);
-					game_state["economy"]["large_factories"] = Math.ceil(remaining_large_factory_health/game_constants["economy"]["large_factory"]["health"]);
-					
-					if((game_state['economy']['small_factories'] == 0) &&
-					   (game_state['economy']['large_factories'] == 0)){
-						console.log("economy destroyed");
-						if(game_state['economy']['account_balance'] < game_constants["military"]["light_turret"]["cost"]){
-							console.log("game lost");
-							MainLoop.stop();
-						}
-					}
-				}
-			}
-			
 			function attack_imminent_callbck(){
 				console.log("attack imminent timer expired");
 				let timer = new GameEngineTimer(ai_attack_timer);
@@ -358,7 +203,7 @@ function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent){
 			
 			function cooldown_callback(){
 				console.log("attack cooldown timer expired");
-				attack();
+				let attack = new AIAttack(game_state, game_constants);
 				let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
 				let timer = new GameEngineTimer(ai_attack_timer_duration);
 				timer.on('end', attack_imminent_callbck);
