@@ -1,6 +1,4 @@
-define(function() {
-
-	return function GameEngineTimer(duration) {
+export default function (duration) {
 		this.duration = duration;
 		this.time_remaining = duration;
 		this.running = false;
@@ -73,4 +71,3 @@ define(function() {
 			}	
 		}
 	}
-});

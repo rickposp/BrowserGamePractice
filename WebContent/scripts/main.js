@@ -1,12 +1,3 @@
-requirejs.config({
-    baseUrl: 'scripts/library',
-    paths: {
-        modules: '../modules'
-    }
-});
+import Game from './modules/game.js';
 
-// Start the main app logic.
-requirejs(['modules/game'], 
-function(Game) {
-	Game();
-});
+Game();

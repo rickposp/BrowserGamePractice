@@ -1,6 +1,3 @@
-define(function () {
-
-    return function GameEngineUIEvent(callback) {
+export default function (callback) {
     	this.trigger = callback;
-    }
-});
+}

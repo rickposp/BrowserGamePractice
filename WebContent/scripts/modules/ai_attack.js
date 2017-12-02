@@ -1,5 +1,6 @@
-define( ['modules/bucket', 'modules/distribution'],
-function (Bucket, Distribution) {
+import Bucket from './bucket.js';
+import Distribution from './distribution.js';
+export default function () {
 	
 	let calculate_attack_size = function(game_constants){
 		return Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
@@ -32,6 +33,9 @@ function (Bucket, Distribution) {
 			light_turret_damage = light_turret_health;
 			heavy_turret_damage = heavy_turret_health;
 		}
+		else if (total_defense_damage == 0){
+			return
+		}
 		else {
 			let buckets = [];
 			buckets.push(
@@ -41,7 +45,7 @@ function (Bucket, Distribution) {
 					new Bucket("heavy_turret", heavy_turret_health)
 			);
 			let distribution = new Distribution(buckets);
-			distribution.destribute_damage(total_defense_damage);
+			distribution.distribute_damage(total_defense_damage);
 			light_turret_damage = distribution.get_bucket_by_name("light_turret").get_points();
 			heavy_turret_damage = distribution.get_bucket_by_name("heavy_turret").get_points();
 		}
@@ -71,6 +75,9 @@ function (Bucket, Distribution) {
 				small_factory_damage = small_factory_health;
 				large_factory_damage = large_factory_health;
 			}
+			else if(total_economy_damage == 0){
+				return;
+			}
 			else{
 				let buckets = [];
 				buckets.push(
@@ -80,7 +87,7 @@ function (Bucket, Distribution) {
 						new Bucket("large_factory", large_factory_health)
 				);
 				let distribution = new Distribution(buckets);
-				distribution.destribute_damage(total_economy_damage);
+				distribution.distribute_damage(total_economy_damage);
 				small_factory_damage = distribution.get_bucket_by_name("small_factory").get_points();
 				large_factory_damage = distribution.get_bucket_by_name("large_factory").get_points();
 			}
@@ -101,4 +108,4 @@ function (Bucket, Distribution) {
 			}
 		}
     }
-});
+}

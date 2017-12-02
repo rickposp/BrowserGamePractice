@@ -1,16 +1,13 @@
 var gulp = require('gulp');
 var browserSync = require('browser-sync').create();
 var concat = require('gulp-concat');
-var ts = require("gulp-typescript");
 var clean = require('gulp-clean');
 var uglify = require('gulp-uglify');
-var jest = require('gulp-jest').default;
-
-var tsProject = ts.createProject("tsconfig.json");
 
 dist_folder = './dist';
 dist_scripts = dist_folder + '/scripts';
 src_scripts = './scripts';
+src_specs = src_scripts + '/spec';
 
 code_processing_tasks = ['html', 'css', "images", 'main_scripts'];
 
@@ -38,13 +35,6 @@ gulp.task('css', ['clean'], function() {
 gulp.task('html', ['clean'], function() {
     return gulp.src('./index.html')
     .pipe(gulp.dest(dist_folder));
-});
-
-gulp.task('jest', function () {
-	  return gulp.src('app.test.js')
-	  .pipe(jest({
-	    "automock": false
-	  }));
 });
 
 gulp.task('browser_reload', code_processing_tasks, function(done){

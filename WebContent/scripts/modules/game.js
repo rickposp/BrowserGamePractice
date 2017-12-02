@@ -1,6 +1,8 @@
-define(['accounting', 'velocity', 'mainloop', 'modules/game_engine_timer', 'modules/game_engine_ui_event', 'modules/ai_attack'], 
-function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent, AIAttack){
-	return function Game(){
+import GameEngineTimer from './game_engine_timer.js';
+import GameEngineUIEvent from './game_engine_ui_event.js';
+import AIAttack from './ai_attack.js';
+
+export default function Game(){
 			'use strict';
 			let game_constants = {
 					  "ai": {
@@ -265,6 +267,4 @@ function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent, AIA
 			}
 			
 			initialize_game()
-		}
-	
-});
+}
