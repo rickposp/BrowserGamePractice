@@ -8,7 +8,11 @@ var jest = require('gulp-jest').default;
 
 var tsProject = ts.createProject("tsconfig.json");
 
-dist_folder = './dist'
+dist_folder = './dist';
+dist_scripts = dist_folder + '/scripts';
+src_scripts = './scripts';
+
+code_processing_tasks = ['html', 'css', "images", 'main_scripts'];
 
 //Delete the dist directory
 gulp.task('clean', function() {
@@ -21,12 +25,10 @@ gulp.task('images', ['clean'], function() {
 	.pipe(gulp.dest(dist_folder));
 });
 
-//Process scripts and concatenate them into one output file
-gulp.task('scripts', function() {
-	 return gulp.src(["node_modules/mainloop.js/build/mainloop.min.js", "library/*.js", 'app.js'])
-	 .pipe(concat('app.min.js'))
-	 .pipe(gulp.dest(dist_folder));
-});
+gulp.task('main_scripts', ['clean'], function(){
+	return gulp.src(["scripts/**/*"])
+	.pipe(gulp.dest(dist_scripts));
+})
 
 gulp.task('css', ['clean'], function() {
     return gulp.src('./styles.css')
@@ -45,21 +47,21 @@ gulp.task('jest', function () {
 	  }));
 });
 
-gulp.task('browser_reload', ['scripts', 'css', 'html', "images"], function(done){
+gulp.task('browser_reload', code_processing_tasks, function(done){
 	browserSync.reload();
 	done();
 });
 
 // Static server
 // passing in an empty function to the init function to appease the error message
-gulp.task('serve', ['scripts', 'css', 'html', "images"], function() {
+gulp.task('serve', code_processing_tasks, function() {
     browserSync.init({
         server: {
             baseDir: dist_folder
         }
     },
     function() {});
-    gulp.watch(['app.js', 'index.html', 'styles.css'], ['browser_reload'])
+    gulp.watch([src_scripts + '/**/*', 'index.html', 'styles.css'], ['browser_reload'])
 });
 
-gulp.task('default', ['scripts', 'html', 'css', "images"])
+gulp.task('default', code_processing_tasks)
