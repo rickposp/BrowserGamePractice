@@ -1,7 +1,6 @@
 define(['accounting', 'velocity', 'mainloop', 'modules/game_engine_timer', 'modules/game_engine_ui_event'], 
 function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent){
-	return {
-		start_game : function(){
+	return function Game(){
 			'use strict';
 			let game_constants = {
 					  "ai": {
@@ -73,91 +72,6 @@ function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent){
 			
 			// event tracking
 			let user_interface_events = [];
-			
-			class GameEngineUIEvent {
-				constructor(callback){
-					this.trigger = callback;
-				}
-			}
-			
-			class GameEngineTimer {
-			
-			  constructor(duration) {
-			    this.duration = duration;
-			    this.time_remaining = duration;
-			    this.running = false;
-			    
-			    this.callback_start = null;
-			    this.callback_stop = null;
-			    this.callback_restart = null;
-			    this.callback_tick = null;
-			    this.callback_end = null;
-			  }
-			
-			  start() {
-				  this.running = true;
-				  if(this.callback_start){
-					  this.callback_start();
-				  }
-			  }
-			  
-			  stop(){
-				 this.running = false;
-				  if(this.callback_stop){
-					  this.callback_stop();
-				  }
-			  }
-			  
-			  restart(){
-				 this.running = true;
-				 this.time_remaining = this.duration; 
-				 if(this.callback_restart){
-					 this.callback_restart();
-				 }
-			  }
-			  
-			  tick(delta){
-				  self = this
-				  self.delta = delta
-				  if(this.running){
-					  if(this.time_remaining <= 0){
-						  this.running = false;
-						  this.callback_end(self);
-					  }
-					  else {
-						  this.time_remaining -= delta;
-					  }
-					  if(this.callback_tick){
-						  this.callback_tick();
-					  }
-				  }
-			  }
-			  
-			  on(event, callback){
-				  switch(event){
-				  	case 'start':
-				  		this.callback_start = callback;
-				  	break;
-				  	
-				  	case 'stop':
-				  		this.callback_stop = callback;
-				  	break;
-				  	
-				  	case 'tick':
-				  		this.callback_tick = callback;
-				  	break;
-				  	
-				  	case 'restart':
-				  		this.callback_restart = callback;
-				  	break;
-				  	
-				  	case 'end':
-				  		this.callback_end = callback;
-				  	break;
-				 }	
-			  }
-			
-			}
 			
 			document.getElementById("start").onclick = function () { 
 				// changing the UI directly here to control the main loop
@@ -507,6 +421,5 @@ function(accounting, Velocity, MainLoop, GameEngineTimer, GameEngineUIEvent){
 			
 			initialize_game()
 		}
-	}
 	
 });

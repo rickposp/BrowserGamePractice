@@ -7,6 +7,6 @@ requirejs.config({
 
 // Start the main app logic.
 requirejs(['modules/game'], 
-function(game) {
-	game.start_game();
+function(Game) {
+	Game();
 });

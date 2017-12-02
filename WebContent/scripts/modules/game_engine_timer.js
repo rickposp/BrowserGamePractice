@@ -1,41 +1,39 @@
 define(function() {
 
-	return {
-		GameEngineTimer: function(){
-			this.duration = duration;
-			this.time_remaining = duration;
-			this.running = false;
+	return function GameEngineTimer(duration) {
+		this.duration = duration;
+		this.time_remaining = duration;
+		this.running = false;
 
-			this.callback_start = null;
-			this.callback_stop = null;
-			this.callback_restart = null;
-			this.callback_tick = null;
-			this.callback_end = null;
-		},
+		this.callback_start = null;
+		this.callback_stop = null;
+		this.callback_restart = null;
+		this.callback_tick = null;
+		this.callback_end = null;
 
-		start : function() {
+		this.start = function() {
 			this.running = true;
 			if(this.callback_start){
 				this.callback_start();
 			}
-		},
+		}
 
-		stop : function(){
+		this.stop = function(){
 			this.running = false;
 			if(this.callback_stop){
 				this.callback_stop();
 			}
-		},
+		}
 
-		restart : function(){
+		this.restart = function(){
 			this.running = true;
 			this.time_remaining = this.duration; 
 			if(this.callback_restart){
 				this.callback_restart();
 			}
-		},
+		}
 
-		tick: function(delta){
+		this.tick = function(delta){
 			self = this
 			self.delta = delta
 			if(this.running){
@@ -50,8 +48,8 @@ define(function() {
 					this.callback_tick();
 				}
 			}
-		},
-		on: function(event, callback){
+		}
+		this.on = function(event, callback){
 			switch(event){
 			case 'start':
 				this.callback_start = callback;
@@ -73,6 +71,6 @@ define(function() {
 				this.callback_end = callback;
 				break;
 			}	
-		}	  
+		}
 	}
 });
