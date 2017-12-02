@@ -1,6 +1,6 @@
 define(function () {
 
-    return function GameEngineUIEvent() {
+    return function GameEngineUIEvent(callback) {
     	this.trigger = callback;
     }
 });
