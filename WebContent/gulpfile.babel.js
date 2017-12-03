@@ -11,7 +11,7 @@ let dist_scripts = dist_folder + '/scripts';
 let src_scripts = './scripts';
 let src_specs = src_scripts + '/spec';
 
-let code_processing_tasks = ['html', 'css', "images", 'main_scripts'];
+let code_processing_tasks = ['html', 'css', "images", 'main_script', 'libraries', 'modules'];
 
 //Delete the dist directory
 gulp.task('clean', function() {
@@ -24,10 +24,21 @@ gulp.task('images', ['clean'], function() {
 	.pipe(gulp.dest(dist_folder));
 });
 
-gulp.task('main_scripts', ['clean'], function(){
-	return gulp.src(["scripts/**/*"])
+gulp.task('main_script', ['clean'], function(){
+	return gulp.src(src_scripts + "/main.js")
 	.pipe(gulp.dest(dist_scripts));
 })
+
+gulp.task('libraries', ['clean'], function(){
+	return gulp.src(src_scripts + "/library/*.js")
+	.pipe(gulp.dest(dist_scripts + "/library" ));
+})
+
+
+gulp.task('modules', ['clean'], function(){
+	return gulp.src(src_scripts + "/modules/*.js")
+	.pipe(gulp.dest(dist_scripts + "/modules"));
+});
 
 gulp.task('css', ['clean'], function() {
     return gulp.src('./styles.css')

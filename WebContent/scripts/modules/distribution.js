@@ -1,9 +1,11 @@
+import Random from './random.js';
+
 export default function (empty_buckets){
 		
 		let calculate_total_bucket_capacity = function(){
 			let limits = _buckets.map(function(bucket)
 					{
-						return bucket.get_limit();
+						return bucket.limit;
 					});
 			
 			let sum = limits.reduce(function(a, b)
@@ -31,7 +33,7 @@ export default function (empty_buckets){
 			
 			for(let i = total_damage; i > 0; i--){
 				let indexes = get_available_bucket_indexes(); // get the indexes of the buckets that are not full
-				let selector = Math.round(Math.random() * indexes.length); // pick a random index from the list
+				let selector = Math.round(Random() * (indexes.length - 1)); // pick a random index from the list
 				_buckets[indexes[selector]].add_points(1); // add a point to the bucket at that index
 			}
 		}

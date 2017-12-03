@@ -1,6 +1,6 @@
 import Bucket from './bucket.js';
 import Distribution from './distribution.js';
-export default function () {
+export default function (game_state, game_constants) {
 	
 	let calculate_attack_size = function(game_constants){
 		return Math.floor((Math.random() * game_constants["ai"]["attack"]["damage_range"]) + game_constants["ai"]["attack"]["base_damage"]);
@@ -12,8 +12,6 @@ export default function () {
 		counter += game_constants["military"]["heavy_turret"]["counter_rate"] * game_state["military"]["heavy_turrets"];
 		return counter;
 	}
-
-    return function AIAttack(game_state, game_constants) {
     	
     	let enemy_ships = calculate_attack_size(game_constants);
 		console.log("The enemy attacked with " + enemy_ships + " ships.");
@@ -107,5 +105,4 @@ export default function () {
 				}
 			}
 		}
-    }
 }

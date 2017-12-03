@@ -1,26 +1,27 @@
-export default function (name, limit) {
- 
-    	this.get_name = function(){
-    		return _name;
-    	}
-    	
-    	this.get_limit = function(){
-    		return _limit;
-    	}
-    	
-    	this.get_points = function(){
-    		return _points;
-    	}
-    	
-    	this.at_limit = function(){
-    		return _points >= limit;
-    	}
-    	
-    	this.add_points = function(points){
-    		_points += points;
-    	}
-    	
-    	let _name = name;
-    	let _limit = limit;
-    	let _points = 0;
-    }
+export default class Bucket {
+	  constructor(name, limit) {
+	    this._name = name;
+	    this._limit = limit;
+	    this._points = 0;
+	  }
+	  
+	get name(){
+  		return this._name;
+  	}
+  	
+  	get limit(){
+  		return this._limit;
+  	}
+  	
+  	get points(){
+  		return this._points;
+  	}
+  	
+  	at_limit(){
+  		return this._points >= this._limit;
+  	}
+  	
+  	add_points(points){
+  		this._points += points;
+  	}
+}

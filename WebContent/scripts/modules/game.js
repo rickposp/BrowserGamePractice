@@ -205,7 +205,7 @@ export default function Game(){
 			
 			function cooldown_callback(){
 				console.log("attack cooldown timer expired");
-				let attack = new AIAttack(game_state, game_constants);
+				AIAttack(game_state, game_constants);
 				let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
 				let timer = new GameEngineTimer(ai_attack_timer_duration);
 				timer.on('end', attack_imminent_callbck);
