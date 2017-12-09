@@ -1,6 +1,7 @@
 import GameEngineTimer from './game_engine_timer.js';
 import GameEngineUIEvent from './game_engine_ui_event.js';
 import AIAttack from './ai_attack.js';
+import Random from './random.js';
 
 export default function Game(){
 			'use strict';
@@ -43,7 +44,9 @@ export default function Game(){
 					    }
 					  },
 					  "engine": {
-						  "account_balance_update_interval": 1000
+						  "account_balance_update_interval": 1000,
+						  "animation_width" : 800,
+						  "animation_height" : 600
 					  }
 					};
 			
@@ -130,6 +133,11 @@ export default function Game(){
 				}
 			};
 			
+			//The `randomInt` helper function
+			function randomInt(min, max) {
+			  return Math.floor(Random() * (max - min + 1)) + min;
+			}
+			
 			function initialize_game(){
 				ticker.add(delta =>
 					update(delta)
@@ -137,34 +145,6 @@ export default function Game(){
 				ticker.add(delta =>
 					draw(delta)
 				);
-				
-				//Create a Pixi Application
-				let app = new PIXI.Application({ 
-				    width: 800, 
-				    height: 600,                       
-				    antialiasing: true, 
-				    transparent: false, 
-				    resolution: 1
-				  }
-				);
-
-				//Add the canvas that Pixi automatically created for you to the HTML document
-				document.getElementById("animation_pane").appendChild(app.view);
-
-				//load an image and run the `setup` function when it's done
-				PIXI.loader
-				  .add("img/alien4.png")
-				  .load(setup);
-				
-				//This `setup` function will run when the image has loaded
-				function setup() {
-
-				  //Create the cat sprite
-				  let ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
-				  
-				  //Add the cat to the stage
-				  app.stage.addChild(ship);
-				}
 				
 				let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
 				initial_attack_imminent_timer.on('end', attack_imminent_callbck);
@@ -281,6 +261,13 @@ export default function Game(){
 			function draw(delta) {
 				process_user_interface_events();
 				
+				ship.vy = 1;
+				ship.y += ship.vy * delta;
+				if(ship.y >= game_constants["engine"]["animation_width"]){
+					ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
+					ship.y = 0;
+				}
+				
 			    document.getElementById('small_factories').innerHTML = "small factories: " + game_state["economy"]["small_factories"];
 			    document.getElementById('large_factories').innerHTML = "large factories: " + game_state["economy"]["large_factories"];
 			    document.getElementById('light_turrets').innerHTML = "light turrets: " + game_state["military"]["light_turrets"];
@@ -297,5 +284,37 @@ export default function Game(){
 				}
 			}
 			
+			//Create a Pixi Application
+			let app = new PIXI.Application({ 
+			    width: game_constants["engine"]["animation_width"], 
+			    height: game_constants["engine"]["animation_height"],                       
+			    antialiasing: true, 
+			    transparent: false, 
+			    resolution: 1
+			  }
+			);
+
+			//Add the canvas that Pixi automatically created for you to the HTML document
+			document.getElementById("animation_pane").appendChild(app.view);
+
+			//load an image and run the `setup` function when it's done
+			PIXI.loader
+			  .add("img/alien4.png")
+			  .load(setup);
+			
+			let ship;
+			//This `setup` function will run when the image has loaded
+			function setup() {
+
+			  //Create the cat sprite
+			  ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
+			  ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
+			  ship.y = 0;
+			  ship.rotation = 3.14159;
+			  //mySprite.visible = false;
+			  
+			  //Add the cat to the stage
+			  app.stage.addChild(ship);
+			}
 			initialize_game()
 }
