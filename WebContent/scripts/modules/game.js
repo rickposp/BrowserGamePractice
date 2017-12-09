@@ -4,6 +4,7 @@ import AIAttack from './ai_attack.js';
 
 export default function Game(){
 			'use strict';
+			const ticker = new PIXI.ticker.Ticker();
 			let game_constants = {
 					  "ai": {
 						    "attack" : {
@@ -65,7 +66,7 @@ export default function Game(){
 			// calculated display values
 			let display_income_rate = 0;
 			
-			// Time tracking (units are in milliseconds)
+			// Time tracking (units are in seconds)
 			let ai_base_attack_timer = 1000 * 60 * 2;
 			let ai_attack_timer_range = 1000 * 60 * 5;
 			let ai_attack_timer = 1000 * 30
@@ -78,14 +79,14 @@ export default function Game(){
 			document.getElementById("start").onclick = function () { 
 				// changing the UI directly here to control the main loop
 				document.getElementById('start').style.visibility  = 'hidden';
-				MainLoop.start(); 
+				ticker.start();
 				document.getElementById('stop').style.visibility  = 'visible';
 			};
 				
 			document.getElementById("stop").onclick = function () { 
 				// changing the UI directly here to control the main loop
 				document.getElementById('stop').style.visibility  = 'hidden';
-				MainLoop.stop();
+				ticker.stop();
 				document.getElementById('start').style.visibility  = 'visible';
 			};
 			
@@ -130,10 +131,12 @@ export default function Game(){
 			};
 			
 			function initialize_game(){
-				MainLoop
-				.setUpdate(update)
-				.setDraw(draw)
-				.setEnd(end)
+				ticker.add(delta =>
+					update(delta)
+				);
+				ticker.add(delta =>
+					draw(delta)
+				);
 				
 				let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
 				initial_attack_imminent_timer.on('end', attack_imminent_callbck);
@@ -257,7 +260,7 @@ export default function Game(){
 			    document.getElementById('income_rate').innerHTML = "income: " + display_income_rate;
 			    let formatted_balance = accounting.formatMoney(game_state["economy"]["account_balance"]);
 			    document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
-			    document.getElementById('fps').innerHTML = MainLoop.getFPS().toFixed(2) + " FPS";
+			    document.getElementById('fps').innerHTML = ticker.FPS.toFixed(2) + " FPS";
 			}
 			
 			function end(fps, panic) {
