@@ -44,8 +44,8 @@ export default function (game_state, game_constants) {
 			);
 			let distribution = new Distribution(buckets);
 			distribution.distribute_damage(total_defense_damage);
-			light_turret_damage = distribution.get_bucket_by_name("light_turret").get_points();
-			heavy_turret_damage = distribution.get_bucket_by_name("heavy_turret").get_points();
+			light_turret_damage = distribution.get_bucket_by_name("light_turret").points;
+			heavy_turret_damage = distribution.get_bucket_by_name("heavy_turret").points;
 		}
 		console.log("light turret damage: " + light_turret_damage);
 		console.log("heavy turret damage: " + heavy_turret_damage);
@@ -86,8 +86,8 @@ export default function (game_state, game_constants) {
 				);
 				let distribution = new Distribution(buckets);
 				distribution.distribute_damage(total_economy_damage);
-				small_factory_damage = distribution.get_bucket_by_name("small_factory").get_points();
-				large_factory_damage = distribution.get_bucket_by_name("large_factory").get_points();
+				small_factory_damage = distribution.get_bucket_by_name("small_factory").points;
+				large_factory_damage = distribution.get_bucket_by_name("large_factory").points;
 			}
 			console.log("small factory damage: " + small_factory_damage);
 			console.log("big factory damage: " + large_factory_damage);

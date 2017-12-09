@@ -204,6 +204,7 @@ export default function Game(){
 			
 			function attack_callback(){
 				console.log("attack action timer expired");
+				add_ships_to_stage();
 				let timer = new GameEngineTimer(ai_attack_cooldown_timer);
 				timer.on('end', cooldown_callback);
 				timer.start();
@@ -216,6 +217,7 @@ export default function Game(){
 			
 			function cooldown_callback(){
 				console.log("attack cooldown timer expired");
+				remove_ships_from_stage();
 				AIAttack(game_state, game_constants);
 				let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
 				let timer = new GameEngineTimer(ai_attack_timer_duration);
@@ -261,12 +263,13 @@ export default function Game(){
 			function draw(delta) {
 				process_user_interface_events();
 				
-				ship.vy = 1;
-				ship.y += ship.vy * delta;
-				if(ship.y >= game_constants["engine"]["animation_width"]){
-					ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
-					ship.y = 0;
-				}
+				ship_sprites.forEach(function(ship){
+					ship.y += ship.vy * delta;
+					if(ship.y >= game_constants["engine"]["animation_width"]){
+						ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
+						ship.y = 0;
+					}
+				});
 				
 			    document.getElementById('small_factories').innerHTML = "small factories: " + game_state["economy"]["small_factories"];
 			    document.getElementById('large_factories').innerHTML = "large factories: " + game_state["economy"]["large_factories"];
@@ -278,12 +281,6 @@ export default function Game(){
 			    document.getElementById('fps').innerHTML = ticker.FPS.toFixed(2) + " FPS";
 			}
 			
-			function end(fps, panic) {
-				if(panic){
-					alert("Panic! The simulation has fallen too far behind.");
-				}
-			}
-			
 			//Create a Pixi Application
 			let app = new PIXI.Application({ 
 			    width: game_constants["engine"]["animation_width"], 
@@ -293,6 +290,18 @@ export default function Game(){
 			    resolution: 1
 			  }
 			);
+			
+			function remove_ships_from_stage(){
+				ship_sprites.forEach(function(ship){
+					app.stage.removeChild(ship);
+				});
+			}
+			
+			function add_ships_to_stage(num_ships){
+				ship_sprites.forEach(function(ship){
+					app.stage.addChild(ship);
+				});
+			}
 
 			//Add the canvas that Pixi automatically created for you to the HTML document
 			document.getElementById("animation_pane").appendChild(app.view);
@@ -302,19 +311,20 @@ export default function Game(){
 			  .add("img/alien4.png")
 			  .load(setup);
 			
-			let ship;
-			//This `setup` function will run when the image has loaded
+			
+			let ship_sprites = [];
+			
 			function setup() {
-
-			  //Create the cat sprite
-			  ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
-			  ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
-			  ship.y = 0;
-			  ship.rotation = 3.14159;
-			  //mySprite.visible = false;
-			  
-			  //Add the cat to the stage
-			  app.stage.addChild(ship);
+				let num_ships = 10;
+				for(let i = 0; i < num_ships; i++){
+					let ship;
+					ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
+					ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
+					ship.y = 0;
+					ship.rotation = 3.14159;
+					ship.vy = randomInt(1, 3);
+					ship_sprites.push(ship);
+				}
 			}
 			initialize_game()
 }
