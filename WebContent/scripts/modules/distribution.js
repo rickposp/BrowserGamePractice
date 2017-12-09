@@ -44,7 +44,7 @@ export default function (empty_buckets){
 		
 		this.get_bucket_by_name = function(bucket_name){
 			return _buckets.filter(function(bucket){
-				return bucket.get_name() == bucket_name;
+				return bucket.name == bucket_name;
 			})[0];
 		}
 		

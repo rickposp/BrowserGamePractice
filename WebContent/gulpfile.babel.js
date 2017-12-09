@@ -21,7 +21,7 @@ gulp.task('clean', function() {
 
 gulp.task('images', ['clean'], function() {
 	return gulp.src("img/*.png")
-	.pipe(gulp.dest(dist_folder));
+	.pipe(gulp.dest(dist_folder + "/img/"));
 });
 
 gulp.task('main_script', ['clean'], function(){

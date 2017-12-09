@@ -31,22 +31,22 @@
 }
 
 #buy_small_factory{
-    background: url(factory_icon.png) no-repeat;
+    background: url(img/factory_icon.png) no-repeat;
     background-size: 100%;
 }
 
 #buy_large_factory{
-    background: url(factory_icon.png) no-repeat;
+    background: url(img/factory_icon.png) no-repeat;
     background-size: 100%;
 }
 
 #buy_light_turret{
-    background: url(crossed_cannons.png) no-repeat;
+    background: url(img/crossed_cannons.png) no-repeat;
     background-size: 100%;
 }
 
 #buy_heavy_turret{
-    background: url(crossed_cannons.png) no-repeat;
+    background: url(img/crossed_cannons.png) no-repeat;
     background-size: 100%;
 }
 
@@ -108,9 +108,10 @@ p{
 
 #animation_pane{
 	background: black;
-	width: 90%;
-    height: 480px;
-    margin: auto;
+	width: 800px;
+    height: 600px;
+    margin-left: auto;
+    margin-right: auto;
     clear: both;
 }
 
