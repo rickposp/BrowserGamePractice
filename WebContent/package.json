@@ -30,7 +30,9 @@
     "jest": "^21.2.1",
     "typescript": "^2.6.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "pixi.js": "^4.6.2"
+  },
   "jest": {
     "testEnvironment": "node"
   },
