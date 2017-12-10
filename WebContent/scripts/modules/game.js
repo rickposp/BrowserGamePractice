@@ -5,7 +5,6 @@ import Random from './random.js';
 
 export default function Game(){
 			'use strict';
-			const ticker = new PIXI.ticker.Ticker();
 			let game_constants = {
 					  "ai": {
 						    "attack" : {
@@ -61,6 +60,12 @@ export default function Game(){
 					  "military": {
 					    "light_turrets": 0,
 					    "heavy_turrets": 0
+					  },
+					  "engine": {
+						  "ship_sprites" : [],
+						  "alert_text" : "",
+						  "pixi_app" : null,
+						  "pixi_ticker" : null
 					  }
 					}
 			
@@ -82,14 +87,14 @@ export default function Game(){
 			document.getElementById("start").onclick = function () { 
 				// changing the UI directly here to control the main loop
 				document.getElementById('start').style.visibility  = 'hidden';
-				ticker.start();
+				game_state["engine"]["pixi_ticker"].start();
 				document.getElementById('stop').style.visibility  = 'visible';
 			};
 				
 			document.getElementById("stop").onclick = function () { 
 				// changing the UI directly here to control the main loop
 				document.getElementById('stop').style.visibility  = 'hidden';
-				ticker.stop();
+				game_state["engine"]["pixi_ticker"].stop();
 				document.getElementById('start').style.visibility  = 'visible';
 			};
 			
@@ -139,10 +144,30 @@ export default function Game(){
 			}
 			
 			function initialize_game(){
-				ticker.add(delta =>
+				//Create a Pixi Application
+				game_state["engine"]["pixi_app"] = new PIXI.Application({ 
+				    width: game_constants["engine"]["animation_width"], 
+				    height: game_constants["engine"]["animation_height"],                       
+				    antialiasing: true, 
+				    transparent: false, 
+				    resolution: 1
+				  }
+				);
+				
+				//Add the canvas that Pixi automatically created for you to the HTML document
+				document.getElementById("animation_pane").appendChild(game_state["engine"]["pixi_app"].view);
+
+				//load an image and run the `setup` function when it's done
+				PIXI.loader
+				  .add("img/alien4.png")
+				  .load();
+				
+				game_state["engine"]["pixi_ticker"] = new PIXI.ticker.Ticker();
+
+				game_state["engine"]["pixi_ticker"].add(delta =>
 					update(delta)
 				);
-				ticker.add(delta =>
+				game_state["engine"]["pixi_ticker"].add(delta =>
 					draw(delta)
 				);
 				
@@ -204,7 +229,7 @@ export default function Game(){
 			
 			function attack_callback(){
 				console.log("attack action timer expired");
-				add_ships_to_stage();
+				add_ships_to_stage(10);
 				let timer = new GameEngineTimer(ai_attack_cooldown_timer);
 				timer.on('end', cooldown_callback);
 				timer.start();
@@ -263,7 +288,7 @@ export default function Game(){
 			function draw(delta) {
 				process_user_interface_events();
 				
-				ship_sprites.forEach(function(ship){
+				game_state["engine"]["ship_sprites"].forEach(function(ship){
 					ship.y += ship.vy * delta;
 					if(ship.y >= game_constants["engine"]["animation_width"]){
 						ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
@@ -278,44 +303,16 @@ export default function Game(){
 			    document.getElementById('income_rate').innerHTML = "income: " + display_income_rate;
 			    let formatted_balance = accounting.formatMoney(game_state["economy"]["account_balance"]);
 			    document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
-			    document.getElementById('fps').innerHTML = ticker.FPS.toFixed(2) + " FPS";
+			    document.getElementById('fps').innerHTML = game_state["engine"]["pixi_ticker"].FPS.toFixed(2) + " FPS";
 			}
 			
-			//Create a Pixi Application
-			let app = new PIXI.Application({ 
-			    width: game_constants["engine"]["animation_width"], 
-			    height: game_constants["engine"]["animation_height"],                       
-			    antialiasing: true, 
-			    transparent: false, 
-			    resolution: 1
-			  }
-			);
-			
 			function remove_ships_from_stage(){
-				ship_sprites.forEach(function(ship){
-					app.stage.removeChild(ship);
+				game_state["engine"]["ship_sprites"].forEach(function(ship){
+					game_state["engine"]["pixi_app"].stage.removeChild(ship);
 				});
 			}
 			
 			function add_ships_to_stage(num_ships){
-				ship_sprites.forEach(function(ship){
-					app.stage.addChild(ship);
-				});
-			}
-
-			//Add the canvas that Pixi automatically created for you to the HTML document
-			document.getElementById("animation_pane").appendChild(app.view);
-
-			//load an image and run the `setup` function when it's done
-			PIXI.loader
-			  .add("img/alien4.png")
-			  .load(setup);
-			
-			
-			let ship_sprites = [];
-			
-			function setup() {
-				let num_ships = 10;
 				for(let i = 0; i < num_ships; i++){
 					let ship;
 					ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
@@ -323,8 +320,13 @@ export default function Game(){
 					ship.y = 0;
 					ship.rotation = 3.14159;
 					ship.vy = randomInt(1, 3);
-					ship_sprites.push(ship);
+					game_state["engine"]["ship_sprites"].push(ship);
 				}
+				
+				game_state["engine"]["ship_sprites"].forEach(function(ship){
+					game_state["engine"]["pixi_app"].stage.addChild(ship);
+				});
 			}
+			
 			initialize_game()
 }
