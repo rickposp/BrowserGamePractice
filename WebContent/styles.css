@@ -78,14 +78,6 @@ p{
 	float: left;
 }
 
-
-#alert_bar{
-	width: 90%;
-	margin: auto;
-	clear: both;
-	min-height: 3em;
-}
-
 #game_pane{
 	margin: 0.2em;
 }

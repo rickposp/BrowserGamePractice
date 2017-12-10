@@ -171,6 +171,11 @@ export default function Game(){
 					draw(delta)
 				);
 				
+				let text = new PIXI.Text('This is a PixiJS text',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+				game_state["engine"]["alert_text"] = text;
+				text.visible = false;
+				game_state["engine"]["pixi_app"].stage.addChild(text);
+				
 				let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
 				initial_attack_imminent_timer.on('end', attack_imminent_callbck);
 				initial_attack_imminent_timer.start();
@@ -214,15 +219,14 @@ export default function Game(){
 			}
 			
 			function attack_imminent_callbck(){
-				console.log("attack imminent timer expired");
 				let timer = new GameEngineTimer(ai_attack_timer);
 				timer.on('end', attack_callback);
 				timer.start();
 				register_timer(timer);
 				let event = new GameEngineUIEvent(function(){
 					let element = document.getElementById('attack_warning')
-					element.innerHTML = 'WARNING! An attack is imminent!';
-					element.style.visibility = 'visible';
+					game_state["engine"]["alert_text"].text = 'WARNING! An attack is imminent!';
+					game_state["engine"]["alert_text"].visible = true;
 				});
 				register_user_interface_event(event);
 			}
@@ -235,7 +239,7 @@ export default function Game(){
 				timer.start();
 				register_timer(timer);
 				let event = new GameEngineUIEvent(function(){
-					document.getElementById('attack_warning').innerHTML = 'ATTACK';
+					game_state["engine"]["alert_text"].text = 'ATTACK';
 				});
 				register_user_interface_event(event);
 			}
@@ -250,7 +254,7 @@ export default function Game(){
 				timer.start();
 				register_timer(timer);	
 				let event = new GameEngineUIEvent(function(){
-					document.getElementById('attack_warning').style.visibility = 'hidden';
+					game_state["engine"]["alert_text"].visible = false;
 				});
 				register_user_interface_event(event);	
 			}
