@@ -65,17 +65,12 @@ export default function Game(){
 						  "ship_sprites" : [],
 						  "alert_text" : "",
 						  "pixi_app" : null,
-						  "pixi_ticker" : null
+						  "pixi_ticker" : null,
+						  "interface_group" : null,
+						  "action_group" : null,
+						  "display_income_rate" : 0
 					  }
 					}
-			
-			let purchase_types = ["small factory", "big factory", "light turret", "heavy turret"];
-			
-			let interface_group;
-			let action_group;
-			
-			// calculated display values
-			let display_income_rate = 0;
 			
 			// Time tracking (units are in seconds)
 			let ai_base_attack_timer = 1000 * 60 * 2;
@@ -178,16 +173,16 @@ export default function Game(){
 					draw(delta)
 				);
 				
-				interface_group = new PIXI.display.Group(1, true);
-				action_group = new PIXI.display.Group(0, true);
+				game_state["engine"]["interface_group"] = new PIXI.display.Group(1, true);
+				game_state["engine"]["action_group"] = new PIXI.display.Group(0, true);
 				
-				game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(interface_group));
-				game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(action_group));
+				game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["interface_group"]));
+				game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["action_group"]));
 				
 				let text = new PIXI.Text('This is a PixiJS text',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
 				game_state["engine"]["alert_text"] = text;
 				text.visible = false;
-				text.parentGroup = interface_group;
+				text.parentGroup = game_state["engine"]["interface_group"];
 				game_state["engine"]["pixi_app"].stage.addChild(text);
 				
 				let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
@@ -280,7 +275,7 @@ export default function Game(){
 				income_rate -= game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["expense_rate"];
 				income_rate -= game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["expense_rate"];
 				game_state["economy"]["account_balance"] += income_rate * time_elapsed_from_last_update;
-				display_income_rate = income_rate * time_elapsed_from_last_update;
+				game_state["engine"]["display_income_rate"] = income_rate * time_elapsed_from_last_update;
 			}
 			
 			function account_balance_update_callback(){
@@ -318,7 +313,7 @@ export default function Game(){
 			    document.getElementById('large_factories').innerHTML = "large factories: " + game_state["economy"]["large_factories"];
 			    document.getElementById('light_turrets').innerHTML = "light turrets: " + game_state["military"]["light_turrets"];
 			    document.getElementById('heavy_turrets').innerHTML = "heavy turrets: " + game_state["military"]["heavy_turrets"];
-			    document.getElementById('income_rate').innerHTML = "income: " + display_income_rate;
+			    document.getElementById('income_rate').innerHTML = "income: " + game_state["engine"]["display_income_rate"];
 			    let formatted_balance = accounting.formatMoney(game_state["economy"]["account_balance"]);
 			    document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
 			    document.getElementById('fps').innerHTML = game_state["engine"]["pixi_ticker"].FPS.toFixed(2) + " FPS";
@@ -338,7 +333,7 @@ export default function Game(){
 					ship.y = 0;
 					ship.rotation = 3.14159;
 					ship.vy = randomInt(1, 3);
-					ship.parentGroup = action_group;
+					ship.parentGroup = game_state["engine"]["action_group"];
 					game_state["engine"]["ship_sprites"].push(ship);
 					game_state["engine"]["pixi_app"].stage.addChild(ship);
 				}
