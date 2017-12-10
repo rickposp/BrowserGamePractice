@@ -45,7 +45,11 @@ export default function Game(){
 					  "engine": {
 						  "account_balance_update_interval": 1000,
 						  "animation_width" : 800,
-						  "animation_height" : 600
+						  "animation_height" : 600,
+						  "ai_base_attack_timer" : 1000 * 60 * 2,
+						  "ai_attack_timer_range" : 1000 * 60 * 5,
+						  "ai_attack_timer" : 1000 * 30,
+						  "ai_attack_cooldown_timer" : 1000 * 10,
 					  }
 					};
 			
@@ -68,19 +72,11 @@ export default function Game(){
 						  "pixi_ticker" : null,
 						  "interface_group" : null,
 						  "action_group" : null,
-						  "display_income_rate" : 0
+						  "display_income_rate" : 0,
+						  "timers" : [],
+					  	  "user_interface_events" : []
 					  }
 					}
-			
-			// Time tracking (units are in seconds)
-			let ai_base_attack_timer = 1000 * 60 * 2;
-			let ai_attack_timer_range = 1000 * 60 * 5;
-			let ai_attack_timer = 1000 * 30
-			let ai_attack_cooldown_timer = 1000 * 10;
-			let timers = [];
-			
-			// event tracking
-			let user_interface_events = [];
 			
 			document.getElementById("start").onclick = function () { 
 				// changing the UI directly here to control the main loop
@@ -197,21 +193,21 @@ export default function Game(){
 			}
 			
 			function register_user_interface_event(event){
-				user_interface_events.push(event);
+				game_state["engine"]["user_interface_events"].push(event);
 			}
 			
 			function register_timer(timer){
-				timers.push(timer);
+				game_state["engine"]["timers"].push(timer);
 			}
 			
 			function process_timers(delta){
-				timers.forEach( function (timer, index)
+				game_state["engine"]["timers"].forEach( function (timer, index)
 				{
 					if(timer.running){
 				    	timer.tick(delta);
 					}
 					else{
-						timers.splice(index, 1);
+						game_state["engine"]["timers"].splice(index, 1);
 					}
 				});
 			}
@@ -228,7 +224,7 @@ export default function Game(){
 			}
 			
 			function attack_imminent_callbck(){
-				let timer = new GameEngineTimer(ai_attack_timer);
+				let timer = new GameEngineTimer(game_constants["engine"]["ai_attack_timer"]);
 				timer.on('end', attack_callback);
 				timer.start();
 				register_timer(timer);
@@ -243,7 +239,7 @@ export default function Game(){
 			function attack_callback(){
 				console.log("attack action timer expired");
 				add_ships_to_stage(10);
-				let timer = new GameEngineTimer(ai_attack_cooldown_timer);
+				let timer = new GameEngineTimer(game_constants["engine"]["ai_attack_cooldown_timer"]);
 				timer.on('end', cooldown_callback);
 				timer.start();
 				register_timer(timer);
@@ -257,7 +253,7 @@ export default function Game(){
 				console.log("attack cooldown timer expired");
 				remove_ships_from_stage();
 				AIAttack(game_state, game_constants);
-				let ai_attack_timer_duration = Math.floor((Math.random() * ai_attack_timer_range) + ai_base_attack_timer);
+				let ai_attack_timer_duration = Math.floor((Math.random() * game_constants["engine"]["ai_attack_timer_range"]) + game_constants["engine"]["ai_base_attack_timer"]);
 				let timer = new GameEngineTimer(ai_attack_timer_duration);
 				timer.on('end', attack_imminent_callbck);
 				timer.start();
@@ -291,10 +287,10 @@ export default function Game(){
 			}
 			
 			function process_user_interface_events(){
-				user_interface_events.forEach( function (event, index)
+				game_state["engine"]["user_interface_events"].forEach( function (event, index)
 						{
 							event.trigger();
-							user_interface_events.splice(index, 1);
+							game_state["engine"]["user_interface_events"].splice(index, 1);
 						});
 			}
 			
