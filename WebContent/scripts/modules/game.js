@@ -71,6 +71,9 @@ export default function Game(){
 			
 			let purchase_types = ["small factory", "big factory", "light turret", "heavy turret"];
 			
+			let interface_group;
+			let action_group;
+			
 			// calculated display values
 			let display_income_rate = 0;
 			
@@ -154,6 +157,10 @@ export default function Game(){
 				  }
 				);
 				
+				//specify display list component
+				game_state["engine"]["pixi_app"].stage = new PIXI.display.Stage();
+				game_state["engine"]["pixi_app"].stage.group.enableSort = true;
+				
 				//Add the canvas that Pixi automatically created for you to the HTML document
 				document.getElementById("animation_pane").appendChild(game_state["engine"]["pixi_app"].view);
 
@@ -171,9 +178,16 @@ export default function Game(){
 					draw(delta)
 				);
 				
+				interface_group = new PIXI.display.Group(1, true);
+				action_group = new PIXI.display.Group(0, true);
+				
+				game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(interface_group));
+				game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(action_group));
+				
 				let text = new PIXI.Text('This is a PixiJS text',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
 				game_state["engine"]["alert_text"] = text;
 				text.visible = false;
+				text.parentGroup = interface_group;
 				game_state["engine"]["pixi_app"].stage.addChild(text);
 				
 				let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
@@ -324,12 +338,10 @@ export default function Game(){
 					ship.y = 0;
 					ship.rotation = 3.14159;
 					ship.vy = randomInt(1, 3);
+					ship.parentGroup = action_group;
 					game_state["engine"]["ship_sprites"].push(ship);
-				}
-				
-				game_state["engine"]["ship_sprites"].forEach(function(ship){
 					game_state["engine"]["pixi_app"].stage.addChild(ship);
-				});
+				}
 			}
 			
 			initialize_game()
