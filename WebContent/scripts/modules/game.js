@@ -2,6 +2,7 @@ import GameEngineTimer from './game_engine_timer.js';
 import GameEngineUIEvent from './game_engine_ui_event.js';
 import AIAttack from './ai_attack.js';
 import Random from './random.js';
+import * as Timer from '../library/pixi-timer.js';
 
 export default function Game(){
 			'use strict';

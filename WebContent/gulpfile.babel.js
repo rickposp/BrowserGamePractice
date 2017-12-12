@@ -30,7 +30,7 @@ gulp.task('main_script', ['clean'], function(){
 })
 
 gulp.task('libraries', ['clean'], function(){
-	return gulp.src(src_scripts + "/library/*.js")
+	return gulp.src([src_scripts + "/library/*.js", src_scripts + "/library/*.js.map"])
 	.pipe(gulp.dest(dist_scripts + "/library" ));
 })
 
