@@ -182,35 +182,18 @@ export default function Game(){
 				text.parentGroup = game_state["engine"]["interface_group"];
 				game_state["engine"]["pixi_app"].stage.addChild(text);
 				
-				let initial_attack_imminent_timer = new GameEngineTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
-				initial_attack_imminent_timer.on('end', attack_imminent_callbck);
-				initial_attack_imminent_timer.start();
-				register_timer(initial_attack_imminent_timer);
+				var timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
+				timer.on('end', attack_imminent_callback);
+				timer.start();
 				
-				let initial_account_balance_update_timer = new GameEngineTimer(game_constants["engine"]["account_balance_update_interval"]);
-				initial_account_balance_update_timer.on('end', account_balance_update_callback);
-				initial_account_balance_update_timer.start();
-				register_timer(initial_account_balance_update_timer);	
+				timer = PIXI.timerManager.createTimer(game_constants["engine"]["account_balance_update_interval"]);
+				timer.loop = true;
+				timer.on('repeat', account_balance_update_callback);
+				timer.start();
 			}
 			
 			function register_user_interface_event(event){
 				game_state["engine"]["user_interface_events"].push(event);
-			}
-			
-			function register_timer(timer){
-				game_state["engine"]["timers"].push(timer);
-			}
-			
-			function process_timers(delta){
-				game_state["engine"]["timers"].forEach( function (timer, index)
-				{
-					if(timer.running){
-				    	timer.tick(delta);
-					}
-					else{
-						game_state["engine"]["timers"].splice(index, 1);
-					}
-				});
 			}
 			
 			function highlight_balance(){
@@ -224,11 +207,11 @@ export default function Game(){
 				Velocity(e, "reverse", { duration: 1000 });
 			}
 			
-			function attack_imminent_callbck(){
-				let timer = new GameEngineTimer(game_constants["engine"]["ai_attack_timer"]);
+			function attack_imminent_callback(){
+				let timer = PIXI.timerManager.createTimer(game_constants["engine"]["ai_attack_timer"]);
 				timer.on('end', attack_callback);
 				timer.start();
-				register_timer(timer);
+				
 				let event = new GameEngineUIEvent(function(){
 					let element = document.getElementById('attack_warning')
 					game_state["engine"]["alert_text"].text = 'WARNING! An attack is imminent!';
@@ -240,10 +223,11 @@ export default function Game(){
 			function attack_callback(){
 				console.log("attack action timer expired");
 				add_ships_to_stage(10);
-				let timer = new GameEngineTimer(game_constants["engine"]["ai_attack_cooldown_timer"]);
+				
+				let timer = PIXI.timerManager.createTimer(game_constants["engine"]["ai_attack_cooldown_timer"]);
 				timer.on('end', cooldown_callback);
 				timer.start();
-				register_timer(timer);
+				
 				let event = new GameEngineUIEvent(function(){
 					game_state["engine"]["alert_text"].text = 'ATTACK';
 				});
@@ -255,10 +239,11 @@ export default function Game(){
 				remove_ships_from_stage();
 				AIAttack(game_state, game_constants);
 				let ai_attack_timer_duration = Math.floor((Math.random() * game_constants["engine"]["ai_attack_timer_range"]) + game_constants["engine"]["ai_base_attack_timer"]);
-				let timer = new GameEngineTimer(ai_attack_timer_duration);
-				timer.on('end', attack_imminent_callbck);
+				
+				let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
+				timer.on('end', attack_imminent_callback);
 				timer.start();
-				register_timer(timer);	
+				
 				let event = new GameEngineUIEvent(function(){
 					game_state["engine"]["alert_text"].visible = false;
 				});
@@ -277,14 +262,11 @@ export default function Game(){
 			
 			function account_balance_update_callback(){
 				account_balance_update(game_constants["engine"]["account_balance_update_interval"]);
-				let timer = new GameEngineTimer(game_constants["engine"]["account_balance_update_interval"]);
-				timer.on('end', account_balance_update_callback);
-				timer.start();
-				register_timer(timer);	
 			}
 			
 			function update(delta){
-				process_timers(delta);
+				const frame_delta = .01667; // length of a frame in seconds
+				PIXI.timerManager.update(frame_delta * delta); // update takes argument in seconds
 			}
 			
 			function process_user_interface_events(){
