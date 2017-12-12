@@ -10,7 +10,11 @@ export default function Game(){
 						    "attack" : {
 						    	"base_damage" : 2,
 						    	"damage_range" : 10,
-						    	"imminent_base_timer" : 1000 * 60 * 2
+						    	"imminent_base_timer" : 1000 * 60 * 2,
+								  "base_timer" : 1000 * 60 * 2,
+								  "timer_range" : 1000 * 60 * 5,
+								  "first_timer" : 1000 * 30,
+								  "cooldown_timer" : 1000 * 10,
 						    },
 							"ships" : {
 								"damage" : 1
@@ -45,11 +49,7 @@ export default function Game(){
 					  "engine": {
 						  "account_balance_update_interval": 1000,
 						  "animation_width" : 800,
-						  "animation_height" : 600,
-						  "ai_base_attack_timer" : 1000 * 60 * 2,
-						  "ai_attack_timer_range" : 1000 * 60 * 5,
-						  "ai_attack_timer" : 1000 * 30,
-						  "ai_attack_cooldown_timer" : 1000 * 10,
+						  "animation_height" : 600
 					  }
 					};
 			
@@ -207,7 +207,7 @@ export default function Game(){
 			}
 			
 			function attack_imminent_callback(){
-				let timer = PIXI.timerManager.createTimer(game_constants["engine"]["ai_attack_timer"]);
+				let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["first_timer"]);
 				timer.on('end', attack_callback);
 				timer.start();
 				
@@ -223,7 +223,7 @@ export default function Game(){
 				console.log("attack action timer expired");
 				add_ships_to_stage(10);
 				
-				let timer = PIXI.timerManager.createTimer(game_constants["engine"]["ai_attack_cooldown_timer"]);
+				let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["cooldown_timer"]);
 				timer.on('end', cooldown_callback);
 				timer.start();
 				
@@ -237,7 +237,7 @@ export default function Game(){
 				console.log("attack cooldown timer expired");
 				remove_ships_from_stage();
 				AIAttack(game_state, game_constants);
-				let ai_attack_timer_duration = Math.floor((Math.random() * game_constants["engine"]["ai_attack_timer_range"]) + game_constants["engine"]["ai_base_attack_timer"]);
+				let ai_attack_timer_duration = Math.floor((Math.random() * game_constants["ai"]["attack"]["timer_range"]) + game_constants["ai"]["attack"]["base_timer"]);
 				
 				let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
 				timer.on('end', attack_imminent_callback);
