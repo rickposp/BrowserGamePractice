@@ -74,7 +74,8 @@ export default function Game(){
 				"action_group" : null,
 				"display_income_rate" : 0,
 				"timers" : [],
-				"user_interface_events" : []
+				"user_interface_events" : [],
+				"pixi_event_emitter" : null
 			}
 	}
 
@@ -93,6 +94,7 @@ export default function Game(){
 	};
 
 	document.getElementById("buy_small_factory").onclick = function () {
+		
 		if(game_state["economy"]["account_balance"] >= game_constants["economy"]["small_factory"]["cost"]){
 			game_state["economy"]["small_factories"] += 1;
 			game_state["economy"]["account_balance"] -= game_constants["economy"]["small_factory"]["cost"];
@@ -189,6 +191,8 @@ export default function Game(){
 		timer.loop = true;
 		timer.on('repeat', account_balance_update_callback);
 		timer.start();
+		
+		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
 	}
 
 	function register_user_interface_event(event){
@@ -211,12 +215,11 @@ export default function Game(){
 		timer.on('end', attack_callback);
 		timer.start();
 
-		let event = new GameEngineUIEvent(function(){
+		game_state['engine']['pixi_event_emitter'].once('ui_event', function(){
 			let element = document.getElementById('attack_warning')
 			game_state["engine"]["alert_text"].text = 'WARNING! An attack is imminent!';
 			game_state["engine"]["alert_text"].visible = true;
 		});
-		register_user_interface_event(event);
 	}
 
 	function attack_callback(){
@@ -227,10 +230,9 @@ export default function Game(){
 		timer.on('end', cooldown_callback);
 		timer.start();
 
-		let event = new GameEngineUIEvent(function(){
+		game_state['engine']['pixi_event_emitter'].once('ui_event', function(){
 			game_state["engine"]["alert_text"].text = 'ATTACK';
 		});
-		register_user_interface_event(event);
 	}
 
 	function cooldown_callback(){
@@ -242,11 +244,10 @@ export default function Game(){
 		let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
 		timer.on('end', attack_imminent_callback);
 		timer.start();
-
-		let event = new GameEngineUIEvent(function(){
+		
+		game_state['engine']['pixi_event_emitter'].once('ui_event', function(){
 			game_state["engine"]["alert_text"].visible = false;
-		});
-		register_user_interface_event(event);	
+		});	
 	}
 
 	function account_balance_update(time_elapsed_from_last_update){
@@ -269,11 +270,7 @@ export default function Game(){
 	}
 
 	function process_user_interface_events(){
-		game_state["engine"]["user_interface_events"].forEach( function (event, index)
-				{
-			event.trigger();
-			game_state["engine"]["user_interface_events"].splice(index, 1);
-				});
+		game_state['engine']['pixi_event_emitter'].emit('ui_event');
 	}
 
 	function draw(delta) {
