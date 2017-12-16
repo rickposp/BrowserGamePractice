@@ -1,6 +1,7 @@
 import AIAttack from './ai_attack.js';
 import Random from './random.js';
 import * as Timer from '../library/pixi-timer.js';
+import Button from './button.js';
 
 export default function Game(){
 	'use strict';
@@ -176,11 +177,37 @@ export default function Game(){
 		game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["interface_group"]));
 		game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["action_group"]));
 
-		let text = new PIXI.Text('This is a PixiJS text',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
+		let text = new PIXI.Text('',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
 		game_state["engine"]["alert_text"] = text;
 		text.visible = false;
 		text.parentGroup = game_state["engine"]["interface_group"];
 		game_state["engine"]["pixi_app"].stage.addChild(text);
+		
+		let button = new Button(800 * 0.5,
+		        600 * 0.5, 150, 75);
+        let style = new PIXI.TextStyle({
+            fontFamily: 'Arial', // Font Family
+            fontSize: 22, // Font Size
+            fontStyle: 'italic',// Font Style
+            fontWeight: 'bold', // Font Weight
+            fill: ['#ffffff', '#F8A9F9'], // gradient
+            stroke: '#4a1850',
+            strokeThickness: 5,
+            dropShadow: true,
+            dropShadowColor: '#000000',
+            dropShadowBlur: 4,
+            dropShadowAngle: Math.PI / 6,
+            dropShadowDistance: 6,
+            wordWrap: true,
+            wordWrapWidth: 440
+        });
+        button.setText("Play!", style);
+        button.clicked = function() {
+            console.log('I am clicked');
+        }
+		button.parentGroup = game_state["engine"]["interface_group"];
+		game_state["engine"]["play_button"] = button;
+		game_state["engine"]["pixi_app"].stage.addChild(button);
 
 		var timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
 		timer.on('end', attack_imminent_callback);
