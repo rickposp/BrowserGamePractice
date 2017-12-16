@@ -13,7 +13,7 @@ export default function Game(){
 					"imminent_base_timer" : 1000 * 60 * 2,
 					"base_timer" : 1000 * 60 * 2,
 					"timer_range" : 1000 * 60 * 5,
-					"first_timer" : 1000 * 30,
+					"first_timer" : 1000 * 1,
 					"cooldown_timer" : 1000 * 10,
 				},
 				"ships" : {
@@ -73,52 +73,10 @@ export default function Game(){
 				"interface_group" : null,
 				"action_group" : null,
 				"display_income_rate" : 0,
-				"timers" : [],
 				"user_interface_events" : [],
 				"pixi_event_emitter" : null
 			}
 	}
-
-	document.getElementById("buy_small_factory").onclick = function () {
-		
-		if(game_state["economy"]["account_balance"] >= game_constants["economy"]["small_factory"]["cost"]){
-			game_state["economy"]["small_factories"] += 1;
-			game_state["economy"]["account_balance"] -= game_constants["economy"]["small_factory"]["cost"];
-		}
-		else{
-			highlight_balance();
-		}
-	};
-
-	document.getElementById("buy_large_factory").onclick = function () {
-		if(game_state["economy"]["account_balance"] >= game_constants["economy"]["large_factory"]["cost"]){
-			game_state["economy"]["large_factories"] += 1;
-			game_state["economy"]["account_balance"] -= game_constants["economy"]["large_factory"]["cost"];
-		}
-		else{
-			highlight_balance();
-		}
-	};
-
-	document.getElementById("buy_light_turret").onclick = function () {
-		if(game_state["economy"]["account_balance"] >= game_constants["military"]["light_turret"]["cost"]){
-			game_state["military"]["light_turrets"] += 1;
-			game_state["economy"]["account_balance"] -= game_constants["military"]["light_turret"]["cost"];
-		}
-		else{
-			highlight_balance();
-		}
-	};
-
-	document.getElementById("buy_heavy_turret").onclick = function () {
-		if(game_state["economy"]["account_balance"] >= game_constants["military"]["heavy_turret"]["cost"]){
-			game_state["military"]["heavy_turrets"] += 1;
-			game_state["economy"]["account_balance"] -= game_constants["military"]["heavy_turret"]["cost"];
-		}
-		else{
-			highlight_balance();
-		}
-	};
 
 	//The `randomInt` helper function
 	function randomInt(min, max) {
@@ -129,7 +87,7 @@ export default function Game(){
 		//Create a Pixi Application
 		game_state["engine"]["pixi_app"] = new PIXI.Application({ 
 			width: game_constants["engine"]["animation_width"], 
-			height: game_constants["engine"]["animation_height"],                       
+			height: game_constants["engine"]["animation_height"],                      
 			antialiasing: true, 
 			transparent: false, 
 			resolution: 1
@@ -201,6 +159,7 @@ export default function Game(){
 		let stop_button = new Button(800 - 100,
 		        50, 150, 75);
 		stop_button.setText("pause", style);
+		stop_button.visible = false;
 		stop_button.clicked = function() {
         	game_state["engine"]["stop_button"].visible = false;
     		game_state["engine"]["pixi_ticker"].stop();
@@ -210,13 +169,8 @@ export default function Game(){
 		game_state["engine"]["stop_button"] = stop_button;
 		game_state["engine"]["pixi_app"].stage.addChild(stop_button);
 
-		var timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
-		timer.on('end', attack_imminent_callback);
-		timer.start();
-
-		timer = PIXI.timerManager.createTimer(game_constants["engine"]["account_balance_update_interval"]);
-		timer.loop = true;
-		timer.on('repeat', account_balance_update_callback);
+		var timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["first_timer"]);
+		timer.on('end', attack_callback);
 		timer.start();
 		
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
@@ -226,55 +180,11 @@ export default function Game(){
 		game_state["engine"]["user_interface_events"].push(event);
 	}
 
-	function highlight_balance(){
-		let e = document.getElementById('account_balance')
-		Velocity(
-				e, 
-				{ 
-					color: "#ff0000", // Animate the text color to the hex value for pure red.
-				}, 
-				200); 
-		Velocity(e, "reverse", { duration: 1000 });
-	}
-
-	function attack_imminent_callback(){
-		let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["first_timer"]);
-		timer.on('end', attack_callback);
-		timer.start();
-
-		game_state['engine']['pixi_event_emitter'].once('ui_event', function(){
-			let element = document.getElementById('attack_warning')
-			game_state["engine"]["alert_text"].text = 'WARNING! An attack is imminent!';
-			game_state["engine"]["alert_text"].visible = true;
-		});
-	}
-
 	function attack_callback(){
-		console.log("attack action timer expired");
-		add_ships_to_stage(10);
-
-		let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["cooldown_timer"]);
-		timer.on('end', cooldown_callback);
-		timer.start();
-
-		game_state['engine']['pixi_event_emitter'].once('ui_event', function(){
-			game_state["engine"]["alert_text"].text = 'ATTACK';
-		});
-	}
-
-	function cooldown_callback(){
-		console.log("attack cooldown timer expired");
-		remove_ships_from_stage();
-		AIAttack(game_state, game_constants);
-		let ai_attack_timer_duration = Math.floor((Math.random() * game_constants["ai"]["attack"]["timer_range"]) + game_constants["ai"]["attack"]["base_timer"]);
-
-		let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
-		timer.on('end', attack_imminent_callback);
-		timer.start();
-		
-		game_state['engine']['pixi_event_emitter'].once('ui_event', function(){
-			game_state["engine"]["alert_text"].visible = false;
-		});	
+		add_ship_to_stage();
+		this.reset(); //Reset the timer
+	    this.time = 1000; //set to 10 seconds
+	    this.start(); //And start again
 	}
 
 	function account_balance_update(time_elapsed_from_last_update){
@@ -306,39 +216,31 @@ export default function Game(){
 		game_state["engine"]["ship_sprites"].forEach(function(ship){
 			ship.y += ship.vy * delta;
 			if(ship.y >= game_constants["engine"]["animation_width"]){
-				ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
-				ship.y = 0;
+				const index = game_state["engine"]["ship_sprites"].indexOf(ship);
+			    if (index !== -1) {
+			    	game_state["engine"]["ship_sprites"].splice(index, 1);
+			    }
+				game_state["engine"]["pixi_app"].stage.removeChild(ship);
 			}
-		});
-
-		document.getElementById('small_factories').innerHTML = "small factories: " + game_state["economy"]["small_factories"];
-		document.getElementById('large_factories').innerHTML = "large factories: " + game_state["economy"]["large_factories"];
-		document.getElementById('light_turrets').innerHTML = "light turrets: " + game_state["military"]["light_turrets"];
-		document.getElementById('heavy_turrets').innerHTML = "heavy turrets: " + game_state["military"]["heavy_turrets"];
-		document.getElementById('income_rate').innerHTML = "income: " + game_state["engine"]["display_income_rate"];
-		let formatted_balance = accounting.formatMoney(game_state["economy"]["account_balance"]);
-		document.getElementById('account_balance').innerHTML = "balance: " + formatted_balance;
-		document.getElementById('fps').innerHTML = game_state["engine"]["pixi_ticker"].FPS.toFixed(2) + " FPS";
-	}
-
-	function remove_ships_from_stage(){
-		game_state["engine"]["ship_sprites"].forEach(function(ship){
-			game_state["engine"]["pixi_app"].stage.removeChild(ship);
 		});
 	}
 
 	function add_ships_to_stage(num_ships){
 		for(let i = 0; i < num_ships; i++){
-			let ship;
-			ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
-			ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
-			ship.y = 0;
-			ship.rotation = 3.14159;
-			ship.vy = randomInt(1, 3);
-			ship.parentGroup = game_state["engine"]["action_group"];
-			game_state["engine"]["ship_sprites"].push(ship);
-			game_state["engine"]["pixi_app"].stage.addChild(ship);
+			add_ship_to_stage()
 		}
+	}
+	
+	function add_ship_to_stage(){
+		let ship;
+		ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
+		ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
+		ship.y = 0;
+		ship.rotation = 3.14159;
+		ship.vy = randomInt(1, 3);
+		ship.parentGroup = game_state["engine"]["action_group"];
+		game_state["engine"]["ship_sprites"].push(ship);
+		game_state["engine"]["pixi_app"].stage.addChild(ship);
 	}
 
 	initialize_game()
