@@ -187,20 +187,6 @@ export default function Game(){
 	    this.start(); //And start again
 	}
 
-	function account_balance_update(time_elapsed_from_last_update){
-		let income_rate = 0;
-		income_rate += game_state["economy"]["small_factories"] * game_constants["economy"]["small_factory"]["profit_rate"];
-		income_rate += game_state["economy"]["large_factories"] * game_constants["economy"]["large_factory"]["profit_rate"];
-		income_rate -= game_state["military"]["light_turrets"] * game_constants["military"]["light_turret"]["expense_rate"];
-		income_rate -= game_state["military"]["heavy_turrets"] * game_constants["military"]["heavy_turret"]["expense_rate"];
-		game_state["economy"]["account_balance"] += income_rate * time_elapsed_from_last_update;
-		game_state["engine"]["display_income_rate"] = income_rate * time_elapsed_from_last_update;
-	}
-
-	function account_balance_update_callback(){
-		account_balance_update(game_constants["engine"]["account_balance_update_interval"]);
-	}
-
 	function update(delta){
 		const frame_delta = .01667; // length of a frame in seconds
 		PIXI.timerManager.update(frame_delta * delta); // update takes argument in seconds
@@ -224,19 +210,13 @@ export default function Game(){
 			}
 		});
 	}
-
-	function add_ships_to_stage(num_ships){
-		for(let i = 0; i < num_ships; i++){
-			add_ship_to_stage()
-		}
-	}
 	
 	function add_ship_to_stage(){
 		let ship;
 		ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
 		ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
 		ship.y = 0;
-		ship.rotation = 3.14159;
+		ship.rotation = Math.PI;
 		ship.vy = randomInt(1, 3);
 		ship.parentGroup = game_state["engine"]["action_group"];
 		game_state["engine"]["ship_sprites"].push(ship);
