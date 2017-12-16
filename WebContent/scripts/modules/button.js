@@ -54,13 +54,11 @@ export default class Button extends PIXI.Sprite {
     }
     
     onDown() {
-        console.log('Clicked');
         this.y += 5;
         this.tint = 0xffffff;
     }
     
     onUp() {
-        console.log('onup');
         if(typeof(this._cb) === 'function') {
             this._cb();
         }
@@ -69,14 +67,12 @@ export default class Button extends PIXI.Sprite {
     }
     
     onHover() {
-        console.log('On Hover');
         this.tint = 0xF8A9F9;
         this.scale.x = 1.2;
         this.scale.y = 1.2;
     }
     
     onOut() {
-        console.log('On Out');
         this.tint = 0xffffff;
         this.scale.x = 1;
         this.scale.y = 1;

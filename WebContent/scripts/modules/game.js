@@ -79,20 +79,6 @@ export default function Game(){
 			}
 	}
 
-	document.getElementById("start").onclick = function () { 
-		// changing the UI directly here to control the main loop
-		document.getElementById('start').style.visibility  = 'hidden';
-		game_state["engine"]["pixi_ticker"].start();
-		document.getElementById('stop').style.visibility  = 'visible';
-	};
-
-	document.getElementById("stop").onclick = function () { 
-		// changing the UI directly here to control the main loop
-		document.getElementById('stop').style.visibility  = 'hidden';
-		game_state["engine"]["pixi_ticker"].stop();
-		document.getElementById('start').style.visibility  = 'visible';
-	};
-
 	document.getElementById("buy_small_factory").onclick = function () {
 		
 		if(game_state["economy"]["account_balance"] >= game_constants["economy"]["small_factory"]["cost"]){
@@ -183,8 +169,8 @@ export default function Game(){
 		text.parentGroup = game_state["engine"]["interface_group"];
 		game_state["engine"]["pixi_app"].stage.addChild(text);
 		
-		let button = new Button(800 * 0.5,
-		        600 * 0.5, 150, 75);
+		let start_button = new Button(800 - 300,
+		        50, 150, 75);
         let style = new PIXI.TextStyle({
             fontFamily: 'Arial', // Font Family
             fontSize: 22, // Font Size
@@ -201,13 +187,28 @@ export default function Game(){
             wordWrap: true,
             wordWrapWidth: 440
         });
-        button.setText("Play!", style);
-        button.clicked = function() {
-            console.log('I am clicked');
+        start_button.setText("run", style);
+        start_button.clicked = function() {
+        	// changing the UI directly here to control the main loop
+        	game_state["engine"]["play_button"].visible  = false;
+    		game_state["engine"]["pixi_ticker"].start();
+    		game_state["engine"]["stop_button"].visible = true;
         }
-		button.parentGroup = game_state["engine"]["interface_group"];
-		game_state["engine"]["play_button"] = button;
-		game_state["engine"]["pixi_app"].stage.addChild(button);
+        start_button.parentGroup = game_state["engine"]["interface_group"];
+		game_state["engine"]["play_button"] = start_button;
+		game_state["engine"]["pixi_app"].stage.addChild(start_button);
+		
+		let stop_button = new Button(800 - 100,
+		        50, 150, 75);
+		stop_button.setText("pause", style);
+		stop_button.clicked = function() {
+        	game_state["engine"]["stop_button"].visible = false;
+    		game_state["engine"]["pixi_ticker"].stop();
+    		game_state["engine"]["play_button"].visible  = true;
+        }
+		stop_button.parentGroup = game_state["engine"]["interface_group"];
+		game_state["engine"]["stop_button"] = stop_button;
+		game_state["engine"]["pixi_app"].stage.addChild(stop_button);
 
 		var timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["imminent_base_timer"]);
 		timer.on('end', attack_imminent_callback);
