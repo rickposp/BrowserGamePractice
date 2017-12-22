@@ -1,21 +1,20 @@
 export default class projectile extends PIXI.Graphics {
 	
-	constructor(container, start_point, end_point, velocity){
+	constructor(start_point, end_point, velocity, manager = null){
 		super();
+		this.manager = manager;
 		this.start_point = start_point;
 		this.end_point = end_point;
 		this.angle = this._calculate_angle();
-		this.rotation = -this.angle;
-		this.vx = velocity * Math.cos(this.angle);
-		this.vy = velocity * Math.sin(this.angle);
+		this.rotation = this.angle;
+		this.vx = velocity * Math.sin(this.angle);
+		this.vy = velocity * Math.cos(this.angle);
 		this.lineStyle(1, 0x1F578A, 1);
 		this.beginFill(0x66CCFF);
 		this.drawRoundedRect(start_point.x, start_point.y, 4, 35, 2);
 		this.endFill();
 		this.pivot = start_point;
 		this.position = start_point;
-		this.container = container;
-		this.container.addChild(this);
 	}
 	
 	update(delta){
@@ -39,14 +38,20 @@ export default class projectile extends PIXI.Graphics {
 		}
 		
 		if(x_coord_reached && y_coord_reached){
-			this.container.removeChild(this);
+			if(manager){
+				this.manager.remove(this);
+			}
 		}
 	}
 	
 	_calculate_angle(){
 		let delta_x = this.end_point.x - this.start_point.x;
 		let delta_y = this.end_point.y - this.start_point.y;
-		return Math.atan(delta_y/delta_x);
+		
+		if(delta_y == 0){
+			return 0;
+		}
+		return Math.atan(delta_x/delta_y);
 	}
 	
 }
