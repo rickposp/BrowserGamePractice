@@ -2,6 +2,7 @@ import AIAttack from './ai_attack.js';
 import Random from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
+import Projectile from './projectile.js';
 
 export default function Game(){
 	'use strict';
@@ -67,6 +68,7 @@ export default function Game(){
 			},
 			"engine": {
 				"ship_sprites" : [],
+				"projectile_sprites" : [],
 				"alert_text" : "",
 				"pixi_app" : null,
 				"pixi_ticker" : null,
@@ -174,6 +176,8 @@ export default function Game(){
 		timer.start();
 		
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
+		
+		fire_beams();
 	}
 
 	function register_user_interface_event(event){
@@ -198,6 +202,10 @@ export default function Game(){
 
 	function draw(delta) {
 		process_user_interface_events();
+		
+		game_state["engine"]["projectile_sprites"].forEach(function(projectile){
+			projectile.update(delta);
+		});
 
 		game_state["engine"]["ship_sprites"].forEach(function(ship){
 			ship.y += ship.vy * delta;
@@ -221,6 +229,24 @@ export default function Game(){
 		ship.parentGroup = game_state["engine"]["action_group"];
 		game_state["engine"]["ship_sprites"].push(ship);
 		game_state["engine"]["pixi_app"].stage.addChild(ship);
+	}
+	
+	function fire_beams(){
+		let start_x = game_constants["engine"]["animation_width"] / 2;
+		let start_y = game_constants["engine"]["animation_height"] / 2;
+		draw_beam(start_x, start_y);
+		draw_beam(start_x + 10, start_y)
+	}
+	
+	function draw_beam(start_x, start_y){
+		let start_point = new PIXI.Point(start_x, start_y)
+		let end_point = new PIXI.Point(500, 400);
+		
+		let missile = new Projectile(game_state["engine"]["pixi_app"].stage, start_point, end_point, 5);
+		missile.parentGroup = game_state["engine"]["action_group"];
+
+		game_state["engine"]["projectile_sprites"].push(missile);
+		console.log(missile);
 	}
 
 	initialize_game()
