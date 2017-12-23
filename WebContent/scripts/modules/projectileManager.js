@@ -12,8 +12,7 @@ export default class projectileManager{
 	}
 	
 	createProjectile(start_point, end_point, velocity){
-		let projectile = new Projectile(start_point, end_point, 5, this)
-		this.add(projectile);
+		let projectile = new Projectile(start_point, end_point, velocity, this)
 		return projectile;
 	}
 	

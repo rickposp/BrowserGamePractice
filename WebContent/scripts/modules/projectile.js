@@ -5,6 +5,7 @@ export default class projectile extends PIXI.Graphics {
 		this.manager = manager;
 		this.start_point = start_point;
 		this.end_point = end_point;
+		this.pivot = start_point;
 		this.angle = this._calculate_angle();
 		this.rotation = this.angle;
 		this.vx = velocity * Math.sin(this.angle);
@@ -13,8 +14,11 @@ export default class projectile extends PIXI.Graphics {
 		this.beginFill(0x66CCFF);
 		this.drawRoundedRect(start_point.x, start_point.y, 4, 35, 2);
 		this.endFill();
-		this.pivot = start_point;
 		this.position = start_point;
+		
+		if(manager){
+			this.manager.add(this);
+		}
 	}
 	
 	update(delta){
