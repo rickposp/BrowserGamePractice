@@ -3,6 +3,7 @@ import Random from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
 import ProjectileManager from './projectileManager.js';
+import ShipManager from './ship_manager.js';
 
 export default function Game(){
 	'use strict';
@@ -103,18 +104,13 @@ export default function Game(){
 		//Add the canvas that Pixi automatically created for you to the HTML document
 		document.getElementById("animation_pane").appendChild(game_state["engine"]["pixi_app"].view);
 
-		//load an image and run the `setup` function when it's done
-		PIXI.loader
-		.add("img/alien4.png")
-		.load();
-
 		game_state["engine"]["pixi_ticker"] = new PIXI.ticker.Ticker();
 
 		game_state["engine"]["pixi_ticker"].add(delta =>
-		update(delta)
+			update(delta)
 		);
 		game_state["engine"]["pixi_ticker"].add(delta =>
-		draw(delta)
+			draw(delta)
 		);
 
 		game_state["engine"]["interface_group"] = new PIXI.display.Group(1, true);
@@ -178,8 +174,7 @@ export default function Game(){
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
 		
 		game_state["engine"]["projectile_manager"] = new ProjectileManager(game_state["engine"]["pixi_app"].stage);
-		
-		fire_beams();
+		game_state["engine"]["ship_manager"] = new ShipManager(game_state["engine"]["pixi_app"].stage);
 	}
 
 	function register_user_interface_event(event){
@@ -191,12 +186,12 @@ export default function Game(){
 		this.reset(); //Reset the timer
 	    this.time = 1000; //set to 10 seconds
 	    this.start(); //And start again
+	    fire_beams();
 	}
 
 	function update(delta){
 		const frame_delta = .01667; // length of a frame in seconds
 		PIXI.timerManager.update(frame_delta * delta); // update takes argument in seconds
-		game_state["engine"]["projectile_manager"].update(delta);
 	}
 
 	function process_user_interface_events(){
@@ -205,6 +200,8 @@ export default function Game(){
 
 	function draw(delta) {
 		process_user_interface_events();
+		game_state["engine"]["projectile_manager"].update(delta);
+		game_state["engine"]["ship_manager"].update(delta);
 
 		game_state["engine"]["ship_sprites"].forEach(function(ship){
 			ship.y += ship.vy * delta;
@@ -220,14 +217,10 @@ export default function Game(){
 	
 	function add_ship_to_stage(){
 		let ship;
-		ship = new PIXI.Sprite(PIXI.loader.resources["img/alien4.png"].texture);
-		ship.x = randomInt(100, game_constants["engine"]["animation_width"]);
-		ship.y = 0;
-		ship.rotation = Math.PI;
-		ship.vy = randomInt(1, 3);
-		ship.parentGroup = game_state["engine"]["action_group"];
-		game_state["engine"]["ship_sprites"].push(ship);
-		game_state["engine"]["pixi_app"].stage.addChild(ship);
+		let texture = PIXI.loader.resources["img/alien4.png"].texture;
+		let start = new PIXI.Point(randomInt(100, game_constants["engine"]["animation_width"] - texture.width), 0 - texture.height);
+		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"]);
+		ship = game_state["engine"]["ship_manager"].createShip(start, end, 3, texture);
 	}
 	
 	function fire_beams(){
@@ -241,5 +234,7 @@ export default function Game(){
 		projectile.parentGroup = game_state["engine"]["action_group"];
 	}
 
-	initialize_game()
+	PIXI.loader
+	.add("img/alien4.png")
+	.load(initialize_game);
 }

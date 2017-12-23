@@ -11,8 +11,8 @@ export default class shipManager{
 		this.container.addChild(ship);
 	}
 	
-	createShip(start_point, end_point, velocity, texture){
-		let ship = new Ship(start_point, end_point, velocity, texture, this)
+	createShip(start_point, end_point, speed, texture){
+		let ship = new Ship(start_point, end_point, speed, texture, this)
 		return ship;
 	}
 	
