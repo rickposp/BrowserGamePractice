@@ -220,6 +220,8 @@ export default function Game(){
 		let texture = PIXI.loader.resources["img/alien4.png"].texture;
 		let start = new PIXI.Point(randomInt(100, game_constants["engine"]["animation_width"] - texture.width), 0 - texture.height);
 		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"]);
+		start.set(400, 300);
+		end.set(300, 400);
 		ship = game_state["engine"]["ship_manager"].createShip(start, end, 3, texture);
 	}
 	
