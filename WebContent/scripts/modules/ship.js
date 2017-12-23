@@ -20,7 +20,7 @@ export default class ship extends PIXI.Sprite {
 		let dist_y = Math.abs(delta_y);
 		let base_angle;
 		let angle;
-		if(dist_x)
+		if(dist_x != 0)
 		{
 			base_angle = Math.atan(dist_y/dist_x);
 			if(delta_x > 0 && delta_y > 0)
@@ -49,15 +49,17 @@ export default class ship extends PIXI.Sprite {
 			}
 		}
 		else{
-			if(delta_x > 0)
+			if(delta_y > 0)
 			{
-				this.vx = speed;
-				this.angle = Math.PI / 2;
+				this.vx = 0;
+				this.vy = speed;
+				angle = Math.PI;
 			}
 			else
 			{
-				this.vx = -speed;
-				this.angle = Math.PI * 3/2;
+				this.vx = 0;
+				this.vy = -speed;
+				angle = 0;
 			}
 		}
 		this.rotation = angle;
@@ -65,6 +67,7 @@ export default class ship extends PIXI.Sprite {
 		if(manager){
 			this.manager.add(this);
 		}
+		console.log(this);
 	}
 	
 	update(delta){
@@ -73,18 +76,18 @@ export default class ship extends PIXI.Sprite {
 		
 		let x_coord_reached = false;
 		if(this.vx > 0){
-			x_coord_reached = (this.x > this.end_point.x)
+			x_coord_reached = (this.x >= this.end_point.x)
 		}
 		else{
-			x_coord_reached = (this.x < this.end_point.x)
+			x_coord_reached = (this.x <= this.end_point.x)
 		}
 		
 		let y_coord_reached = false;
 		if(this.vy > 0){
-			y_coord_reached = (this.y > this.end_point.y)
+			y_coord_reached = (this.y >= this.end_point.y)
 		}
 		else{
-			y_coord_reached = (this.y < this.end_point.y)
+			y_coord_reached = (this.y <= this.end_point.y)
 		}
 		
 		if(x_coord_reached && y_coord_reached){
