@@ -1,4 +1,4 @@
-export default class ship extends PIXI.Sprite {
+export default class animatedSprite extends PIXI.Sprite {
 	
 	constructor(start_point, end_point, speed, texture, manager = null){
 		super(texture);
@@ -80,7 +80,6 @@ export default class ship extends PIXI.Sprite {
 		if(manager){
 			this.manager.add(this);
 		}
-		console.log(this);
 	}
 	
 	update(delta){

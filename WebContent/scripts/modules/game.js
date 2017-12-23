@@ -3,7 +3,7 @@ import Random from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
 import ProjectileManager from './projectileManager.js';
-import ShipManager from './ship_manager.js';
+import AnimatedSpriteManager from './animated_sprite_manager.js';
 
 export default function Game(){
 	'use strict';
@@ -174,7 +174,7 @@ export default function Game(){
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
 		
 		game_state["engine"]["projectile_manager"] = new ProjectileManager(game_state["engine"]["pixi_app"].stage);
-		game_state["engine"]["ship_manager"] = new ShipManager(game_state["engine"]["pixi_app"].stage);
+		game_state["engine"]["ship_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
 	}
 
 	function register_user_interface_event(event){
@@ -220,9 +220,7 @@ export default function Game(){
 		let texture = PIXI.loader.resources["img/alien4.png"].texture;
 		let start = new PIXI.Point(randomInt(100, game_constants["engine"]["animation_width"] - texture.width), 0 - texture.height);
 		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"]);
-		start.set(300, 200);
-		end.set(400, 400);
-		ship = game_state["engine"]["ship_manager"].createShip(start, end, 3, texture);
+		ship = game_state["engine"]["ship_manager"].create(start, end, 3, texture);
 	}
 	
 	function fire_beams(){
