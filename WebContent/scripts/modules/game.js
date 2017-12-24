@@ -1,8 +1,6 @@
-import AIAttack from './ai_attack.js';
 import Random from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
-import ProjectileManager from './projectileManager.js';
 import AnimatedSpriteManager from './animated_sprite_manager.js';
 
 export default function Game(){
@@ -173,7 +171,7 @@ export default function Game(){
 		
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
 		
-		game_state["engine"]["projectile_manager"] = new ProjectileManager(game_state["engine"]["pixi_app"].stage);
+		game_state["engine"]["projectile_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
 		game_state["engine"]["ship_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
 	}
 
@@ -202,39 +200,27 @@ export default function Game(){
 		process_user_interface_events();
 		game_state["engine"]["projectile_manager"].update(delta);
 		game_state["engine"]["ship_manager"].update(delta);
-
-		game_state["engine"]["ship_sprites"].forEach(function(ship){
-			ship.y += ship.vy * delta;
-			if(ship.y >= game_constants["engine"]["animation_width"]){
-				const index = game_state["engine"]["ship_sprites"].indexOf(ship);
-			    if (index !== -1) {
-			    	game_state["engine"]["ship_sprites"].splice(index, 1);
-			    }
-				game_state["engine"]["pixi_app"].stage.removeChild(ship);
-			}
-		});
 	}
 	
 	function add_ship_to_stage(){
 		let ship;
 		let texture = PIXI.loader.resources["img/alien4.png"].texture;
 		let start = new PIXI.Point(randomInt(100, game_constants["engine"]["animation_width"] - texture.width), 0 - texture.height);
-		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"]);
-		ship = game_state["engine"]["ship_manager"].create(start, end, 3, texture);
+		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"] + texture.height);
+		ship = game_state["engine"]["ship_manager"].create(start, end, randomInt(1,3), texture);
 	}
 	
 	function fire_beams(){
-		let start_point = new PIXI.Point(game_constants["engine"]["animation_width"] / 2, game_constants["engine"]["animation_height"] / 2);
-		let start_point_offset = new PIXI.Point(game_constants["engine"]["animation_width"] / 2 + 10, game_constants["engine"]["animation_height"] / 2);
-		let target = new PIXI.Point(game_constants["engine"]["animation_width"] / 2, game_constants["engine"]["animation_height"]);
+		let start_point1 = new PIXI.Point(100,100);
+		let end_point1 = new PIXI.Point(300,300);
+		let texture = PIXI.loader.resources["img/blue_beam.png"].texture;
 		let projectile = null;
-		projectile = game_state["engine"]["projectile_manager"].createProjectile(start_point, target, 5);
-		projectile.parentGroup = game_state["engine"]["action_group"];
-		projectile = game_state["engine"]["projectile_manager"].createProjectile(start_point_offset, target, 5);
+		projectile = game_state["engine"]["projectile_manager"].create(start_point1, end_point1, 5, texture);
 		projectile.parentGroup = game_state["engine"]["action_group"];
 	}
 
 	PIXI.loader
 	.add("img/alien4.png")
+	.add("img/blue_beam.png")
 	.load(initialize_game);
 }
