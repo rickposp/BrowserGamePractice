@@ -22,17 +22,17 @@ export default class animatedSpriteManager{
 	}
 	
 	update(delta){
-		this._queue.forEach(function(sprite){
+		this._sprites.forEach(function(sprite){
 			sprite.update(delta);
 		});
 	}
 	
-	remove_from_queue(sprite){
-		var index = this._queue.indexOf(sprite);
-		if (index > -1) {
-			this._queue.splice(index, 1);
-		}
-	}
+//	remove_from_queue(sprite){
+//		var index = this._queue.indexOf(sprite);
+//		if (index > -1) {
+//			this._queue.splice(index, 1);
+//		}
+//	}
 	
 	get sprites(){
 		return this._sprites;
