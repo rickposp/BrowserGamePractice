@@ -30,7 +30,6 @@ export default class animatedSprite extends PIXI.Sprite {
 		if((dist_x != 0) && (dist_y != 0))
 		{
 			base_angle = Math.atan(dist_y/dist_x);
-			//console.log(base_angle);
 			if(delta_x > 0 && delta_y > 0)
 			{
 				angle = base_angle + Math.PI * 1/2;

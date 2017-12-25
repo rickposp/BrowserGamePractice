@@ -2,6 +2,7 @@ import Random from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
 import AnimatedSpriteManager from './animated_sprite_manager.js';
+import SpriteEmitter from './sprite_emitter.js';
 
 export default function Game(){
 	'use strict';
@@ -170,9 +171,9 @@ export default function Game(){
 		timer.start();
 		
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
-		
-		game_state["engine"]["projectile_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
 		game_state["engine"]["ship_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
+		
+		fire_beams();
 	}
 
 	function register_user_interface_event(event){
@@ -184,7 +185,6 @@ export default function Game(){
 		this.reset(); //Reset the timer
 	    this.time = 1000; //set to 10 seconds
 	    this.start(); //And start again
-	    fire_beams();
 	}
 
 	function update(delta){
@@ -198,7 +198,7 @@ export default function Game(){
 
 	function draw(delta) {
 		process_user_interface_events();
-		game_state["engine"]["projectile_manager"].update(delta);
+		game_state["engine"]["sprite_emitter"].update(delta);
 		game_state["engine"]["ship_manager"].update(delta);
 	}
 	
@@ -211,12 +211,17 @@ export default function Game(){
 	}
 	
 	function fire_beams(){
-		let start_point1 = new PIXI.Point(100,100);
-		let end_point1 = new PIXI.Point(300,300);
-		let texture = PIXI.loader.resources["img/blue_beam.png"].texture;
-		let projectile = null;
-		projectile = game_state["engine"]["projectile_manager"].create(start_point1, end_point1, 5, texture);
-		projectile.parentGroup = game_state["engine"]["action_group"];
+		let opts = {
+			"origin" : new PIXI.Point(100, 100),
+			"destination" : new PIXI.Point(300, 456),
+			"speed" : 5,
+			"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
+			"duration" : 10000,
+			"rate" : 0.01,
+			"container" : game_state["engine"]["pixi_app"].stage
+		}
+		game_state["engine"]["sprite_emitter"] = new SpriteEmitter(opts);
+		game_state["engine"]["sprite_emitter"].start();
 	}
 
 	PIXI.loader
