@@ -11,11 +11,14 @@ export default class animatedSprite extends PIXI.Sprite {
 		this._active = active;
 		this._destination_reached = false;
 		
+		this.vx = 0;
+		this.vy = 0;
+		
 		if(speed <= 0){
 			throw "speed must be greater than 0";
 		}
 		
-		this.position.copy(start_point);
+		this.position = start_point;
 		this.anchor.set(0,0);
 		this.pivot.set(this.width/2, this.height/2);
 		
@@ -48,26 +51,26 @@ export default class animatedSprite extends PIXI.Sprite {
 			if(delta_x > 0 && delta_y > 0)
 			{
 				angle = base_angle + Math.PI * 1/2;
-				this.vx = this.speed * Math.cos(base_angle);
-				this.vy = this.speed * Math.sin(base_angle);
+				this.vx = this._speed * Math.cos(base_angle);
+				this.vy = this._speed * Math.sin(base_angle);
 			}
 			else if(delta_x < 0 && delta_y > 0)
 			{
 				angle = base_angle + Math.PI;
-				this.vx = -(this.speed * Math.cos(base_angle));
-				this.vy = this.speed * Math.sin(base_angle);
+				this.vx = -(this._speed * Math.cos(base_angle));
+				this.vy = this._speed * Math.sin(base_angle);
 			}
 			else if(delta_x < 0 && delta_y < 0)
 			{
 				angle = base_angle + Math.PI * 3/2;
-				this.vx = -(this.speed * Math.cos(base_angle));
-				this.vy = -(this.speed * Math.sin(base_angle));
+				this.vx = -(this._speed * Math.cos(base_angle));
+				this.vy = -(this._speed * Math.sin(base_angle));
 			}
 			else
 			{
 				angle = Math.PI * 1/2 - base_angle;
-				this.vx = this.speed * Math.cos(base_angle);
-				this.vy = -(this.speed * Math.sin(base_angle));
+				this.vx = this._speed * Math.cos(base_angle);
+				this.vy = -(this._speed * Math.sin(base_angle));
 			}
 		}
 		else if(delta_x == 0){
@@ -98,7 +101,6 @@ export default class animatedSprite extends PIXI.Sprite {
 			}
 		}
 		this.rotation = angle;
-		
 		this.x += this.vx * delta;
 		this.y += this.vy * delta;
 		
