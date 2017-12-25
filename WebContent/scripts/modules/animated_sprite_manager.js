@@ -1,32 +1,40 @@
 import AnimatedSprite from './animated_sprite.js';
 
 export default class animatedSpriteManager{
-	constructor(container){
-		this.sprites = [];
-		this.container = container;
+	constructor(){
+		this._sprites = [];
+		this._queue = [];
 	}
 	
 	add(sprite){
-		this.sprites.push(sprite);
-		this.container.addChild(sprite);
+		this._sprites.push(sprite);
 	}
 	
 	create(start_point, end_point, speed, texture){
-		let sprite = new AnimatedSprite(start_point, end_point, speed, texture, this)
-		return sprite;
+		return new AnimatedSprite(start_point, end_point, speed, texture, true, this);
 	}
 	
 	remove(sprite){
 		var index = this.sprites.indexOf(sprite);
 		if (index > -1) {
-			this.sprites.splice(index, 1);
-			this.container.removeChild(sprite);
+			this._sprites.splice(index, 1);
 		}
 	}
 	
 	update(delta){
-		this.sprites.forEach(function(sprite){
+		this._queue.forEach(function(sprite){
 			sprite.update(delta);
 		});
+	}
+	
+	remove_from_queue(sprite){
+		var index = this._queue.indexOf(sprite);
+		if (index > -1) {
+			this._queue.splice(index, 1);
+		}
+	}
+	
+	get sprites(){
+		return this._sprites;
 	}
 }

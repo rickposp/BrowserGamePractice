@@ -76,7 +76,8 @@ export default function Game(){
 				"action_group" : null,
 				"display_income_rate" : 0,
 				"user_interface_events" : [],
-				"pixi_event_emitter" : null
+				"pixi_event_emitter" : null,
+				"sprite_emitters" : []
 			}
 	}
 
@@ -172,8 +173,6 @@ export default function Game(){
 		
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
 		game_state["engine"]["ship_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
-		
-		fire_beams();
 	}
 
 	function register_user_interface_event(event){
@@ -198,7 +197,9 @@ export default function Game(){
 
 	function draw(delta) {
 		process_user_interface_events();
-		game_state["engine"]["sprite_emitter"].update(delta);
+		game_state["engine"]["sprite_emitters"].forEach(function(emitter){
+			emitter.update(delta);
+		});
 		game_state["engine"]["ship_manager"].update(delta);
 	}
 	
@@ -208,20 +209,23 @@ export default function Game(){
 		let start = new PIXI.Point(randomInt(100, game_constants["engine"]["animation_width"] - texture.width), 0 - texture.height);
 		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"] + texture.height);
 		ship = game_state["engine"]["ship_manager"].create(start, end, randomInt(1,3), texture);
+		game_state["engine"]["pixi_app"].stage.addChild(ship);
+		fire_beams(ship.position, new PIXI.Point(400, 600));
 	}
 	
-	function fire_beams(){
+	function fire_beams(origin, destination){
 		let opts = {
-			"origin" : new PIXI.Point(100, 100),
-			"destination" : new PIXI.Point(300, 456),
-			"speed" : 5,
-			"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
-			"duration" : 10000,
-			"rate" : 0.01,
-			"container" : game_state["engine"]["pixi_app"].stage
-		}
-		game_state["engine"]["sprite_emitter"] = new SpriteEmitter(opts);
-		game_state["engine"]["sprite_emitter"].start();
+				"origin" : origin,
+				"destination" : destination,
+				"speed" : 5,
+				"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
+				"duration" : 1000,
+				"rate" : 0.005,
+				"container" : game_state["engine"]["pixi_app"].stage
+			}
+		let emitter = new SpriteEmitter(opts);
+		game_state["engine"]["sprite_emitters"].push(emitter);
+		emitter.start();
 	}
 
 	PIXI.loader
