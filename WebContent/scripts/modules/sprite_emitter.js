@@ -6,6 +6,12 @@ export default class spriteEmitter {
 	
 	constructor(opts=null){
 		this._sprite_manager = new AnimatedSpriteManager();
+		this._sprite_manager.on(
+				"sprite_reached_destination", 
+				function(sprite){
+					sprite.destroy();
+				}
+			);
 		if(opts){
 			this.configure(opts);
 		}

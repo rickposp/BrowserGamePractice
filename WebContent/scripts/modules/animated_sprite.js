@@ -28,16 +28,16 @@ export default class animatedSprite extends PIXI.Sprite {
 		}
 	}
 	
-	get active(){
-		return this._active;
+	get moving(){
+		return this._moving;
 	}
 	
-	set active(active){
-		this._active = true;
+	get destinationReached(){
+		return this._destination_reached;
 	}
 	
 	update(delta){
-		if(this.destination_reached){
+		if(this._destination_reached){
 			return;
 		}
 		let delta_x = this._end_point.x - this._start_point.x;
@@ -122,14 +122,14 @@ export default class animatedSprite extends PIXI.Sprite {
 		}
 		
 		if(x_coord_reached && y_coord_reached){
-			this.destination_reached = true;
-			this.moving = false;
+			this._destination_reached = true;
+			this._moving = false;
 		}
 		
 		if(((this.vx != 0) || 
 		   (this.vy != 0)) &&
-		   !this.destination_reached){
-			this.moving = true;
+		   !this._destination_reached){
+			this._moving = true;
 		}
 	}
 }

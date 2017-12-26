@@ -1,10 +1,10 @@
 // Animation Runner
 import AnimatedSprite from './animated_sprite.js';
 
-export default class animatedSpriteManager{
+export default class animatedSpriteManager extends PIXI.utils.EventEmitter{
 	constructor(){
+		super();
 		this._sprites = [];
-		this._queue = [];
 	}
 	
 	add(sprite){
@@ -23,9 +23,13 @@ export default class animatedSpriteManager{
 	}
 	
 	update(delta){
+		//console.log(this);
 		this._sprites.forEach(function(sprite){
+			if(sprite.destinationReached){
+				this.emit('sprite_reached_destination', sprite);
+			}
 			sprite.update(delta);
-		});
+		}, this);
 	}
 	
 	get sprites(){
