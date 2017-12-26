@@ -210,12 +210,12 @@ export default function Game(){
 		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"] + texture.height);
 		ship = game_state["engine"]["ship_manager"].create(start, end, randomInt(1,3), texture);
 		game_state["engine"]["pixi_app"].stage.addChild(ship);
-		fire_beams(ship.position, new PIXI.Point(400, 600));
+		fire_beams(ship, new PIXI.Point(400, 600));
 	}
 	
-	function fire_beams(origin, destination){
+	function fire_beams(ship, destination){
 		let opts = {
-				"origin" : origin,
+				"origin" : ship.position,
 				"destination" : destination,
 				"speed" : 5,
 				"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
@@ -224,8 +224,14 @@ export default function Game(){
 				"container" : game_state["engine"]["pixi_app"].stage
 			}
 		let emitter = new SpriteEmitter(opts);
+		ship.addChild(emitter);
 		game_state["engine"]["sprite_emitters"].push(emitter);
-		emitter.start();
+		
+		let bound_function = emitter.start.bind(emitter);
+		
+		var timer = PIXI.timerManager.createTimer(2 * 1000);
+		timer.on('end', bound_function);
+		timer.start();
 	}
 
 	PIXI.loader

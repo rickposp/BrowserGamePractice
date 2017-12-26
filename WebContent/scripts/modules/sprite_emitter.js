@@ -2,9 +2,10 @@ import * as Timer from '../library/pixi-timer.js';
 import AnimatedSprite from './animated_sprite.js';
 import AnimatedSpriteManager from './animated_sprite_manager.js';
 
-export default class spriteEmitter {
+export default class spriteEmitter extends PIXI.Container {
 	
 	constructor(opts=null){
+		super();
 		this._sprite_manager = new AnimatedSpriteManager();
 		this._sprite_manager.on(
 				"sprite_reached_destination", 
@@ -60,6 +61,7 @@ export default class spriteEmitter {
 	}
 	
 	start(){
+		console.log(this);
 		if(this._configured){
 			this._timer.start();
 		}
