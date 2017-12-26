@@ -21,7 +21,7 @@ export default class ship{
 				"destination" : _target,
 				"speed" : 5,
 				"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
-				"duration" : 1000,
+				"duration" : 500,
 				"rate" : 0.005
 			}
 		this.emitter = new SpriteEmitter(emitter_opts);
@@ -30,15 +30,13 @@ export default class ship{
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
 		let bound_function = this.emitter.start.bind(this.emitter);
 		
-		var timer = PIXI.timerManager.createTimer(2 * 1000);
+		var timer = PIXI.timerManager.createTimer(1 * 1000);
 		timer.on('end', bound_function);
 		timer.start();
 	}
 	
 	update(delta){
 		// move the sprite and the emitter in unison
-		this.ship.update(delta);
-		this.emitter.update(delta);
 		this.emitter.position.copy(this.ship.position);
 	}
 	
