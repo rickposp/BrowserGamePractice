@@ -39,7 +39,7 @@ export default class spriteEmitter {
 		let sprite_manager = sprite_emitter._sprite_manager;
 		let container = sprite_emitter._container;
 		
-		let sprite = sprite_manager.create(start_point, end_point, speed, texture, true);
+		let sprite = sprite_manager.create(start_point, end_point, speed, texture);
 		container.addChild(sprite);
 	}
 	

@@ -1,3 +1,4 @@
+// Animation Runner
 import AnimatedSprite from './animated_sprite.js';
 
 export default class animatedSpriteManager{
@@ -11,7 +12,7 @@ export default class animatedSpriteManager{
 	}
 	
 	create(start_point, end_point, speed, texture){
-		return new AnimatedSprite(start_point, end_point, speed, texture, true, this);
+		return new AnimatedSprite(start_point, end_point, speed, texture, this);
 	}
 	
 	remove(sprite){
@@ -26,13 +27,6 @@ export default class animatedSpriteManager{
 			sprite.update(delta);
 		});
 	}
-	
-//	remove_from_queue(sprite){
-//		var index = this._queue.indexOf(sprite);
-//		if (index > -1) {
-//			this._queue.splice(index, 1);
-//		}
-//	}
 	
 	get sprites(){
 		return this._sprites;

@@ -1,6 +1,7 @@
+// Animation
 export default class animatedSprite extends PIXI.Sprite {
 	
-	constructor(start_point, end_point, speed, texture, active = true, manager = null){
+	constructor(start_point, end_point, speed, texture, manager = null){
 		super(texture);
 		this._manager = manager;
 		this._start_point = new PIXI.Point();
@@ -8,7 +9,7 @@ export default class animatedSprite extends PIXI.Sprite {
 		this._end_point = new PIXI.Point();
 		this._end_point.copy(end_point);
 		this._speed = speed;
-		this._active = active;
+		this._moving = false;
 		this._destination_reached = false;
 		
 		this.vx = 0;
@@ -36,7 +37,7 @@ export default class animatedSprite extends PIXI.Sprite {
 	}
 	
 	update(delta){
-		if(!this._active){
+		if(this.destination_reached){
 			return;
 		}
 		let delta_x = this._end_point.x - this._start_point.x;
@@ -56,7 +57,7 @@ export default class animatedSprite extends PIXI.Sprite {
 			}
 			else if(delta_x < 0 && delta_y > 0)
 			{
-				angle = base_angle + Math.PI;
+				angle = Math.PI * 1/2 - base_angle;
 				this.vx = -(this._speed * Math.cos(base_angle));
 				this.vy = this._speed * Math.sin(base_angle);
 			}
@@ -122,9 +123,13 @@ export default class animatedSprite extends PIXI.Sprite {
 		
 		if(x_coord_reached && y_coord_reached){
 			this.destination_reached = true;
-//			if(this.manager){
-//				this.manager.remove_from_queue(this);
-//			}
+			this.moving = false;
+		}
+		
+		if(((this.vx != 0) || 
+		   (this.vy != 0)) &&
+		   !this.destination_reached){
+			this.moving = true;
 		}
 	}
 }
