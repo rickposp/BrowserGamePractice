@@ -23,7 +23,6 @@ export default class animatedSpriteManager extends PIXI.utils.EventEmitter{
 	}
 	
 	update(delta){
-		//console.log(this);
 		this._sprites.forEach(function(sprite){
 			if(sprite.destinationReached){
 				this.emit('sprite_reached_destination', sprite);

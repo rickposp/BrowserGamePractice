@@ -3,6 +3,7 @@ import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
 import AnimatedSpriteManager from './animated_sprite_manager.js';
 import SpriteEmitter from './sprite_emitter.js';
+import Ship from './ship.js';
 
 export default function Game(){
 	'use strict';
@@ -77,7 +78,8 @@ export default function Game(){
 				"display_income_rate" : 0,
 				"user_interface_events" : [],
 				"pixi_event_emitter" : null,
-				"sprite_emitters" : []
+				"sprite_emitters" : [],
+				"ships" : []
 			}
 	}
 
@@ -200,33 +202,43 @@ export default function Game(){
 		game_state["engine"]["sprite_emitters"].forEach(function(emitter){
 			emitter.update(delta);
 		});
+		game_state["engine"]["ships"].forEach(function(ship){
+			ship.update(delta);
+		});
 		game_state["engine"]["ship_manager"].update(delta);
 	}
 	
 	function add_ship_to_stage(){
-		let ship;
 		let texture = PIXI.loader.resources["img/alien4.png"].texture;
 		let start = new PIXI.Point(randomInt(100, game_constants["engine"]["animation_width"] - texture.width), 0 - texture.height);
-		let end = new PIXI.Point(start.x, game_constants["engine"]["animation_height"] + texture.height);
-		ship = game_state["engine"]["ship_manager"].create(start, end, randomInt(1,3), texture);
-		game_state["engine"]["pixi_app"].stage.addChild(ship);
-		fire_beams(ship, new PIXI.Point(400, 600));
+		let opts = {
+				"start": start,
+				"end": new PIXI.Point(start.x, game_constants["engine"]["animation_height"] + texture.height),
+				"speed": randomInt(1,3),
+				"parent_container": game_state["engine"]["pixi_app"].stage,
+				"ship_manager": game_state["engine"]["ship_manager"],
+				"emitter_manager": game_state["engine"]["sprite_emitters"],
+				"texture": texture,
+				"target" : new PIXI.Point(400, 600)
+		};
+		let ship = new Ship(opts);
+		game_state["engine"]["ships"].push(ship);
 	}
 	
 	function fire_beams(ship, destination){
 		let opts = {
-				"origin" : ship.position,
+				"container" : game_state["engine"]["pixi_app"].stage,
+				"origin" : new PIXI.Point(0, 0), // anchor is in the middle of the ship
 				"destination" : destination,
 				"speed" : 5,
 				"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
 				"duration" : 1000,
-				"rate" : 0.005,
-				"container" : game_state["engine"]["pixi_app"].stage
+				"rate" : 0.005
 			}
 		let emitter = new SpriteEmitter(opts);
-		ship.addChild(emitter);
 		game_state["engine"]["sprite_emitters"].push(emitter);
 		
+		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
 		let bound_function = emitter.start.bind(emitter);
 		
 		var timer = PIXI.timerManager.createTimer(2 * 1000);
