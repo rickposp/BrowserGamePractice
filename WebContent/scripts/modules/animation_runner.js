@@ -1,7 +1,7 @@
 // Animation Runner
-import AnimatedSprite from './animated_sprite.js';
+import AnimatedSprite from './animation.js';
 
-export default class animatedSpriteManager extends PIXI.utils.EventEmitter{
+export default class animationRunner extends PIXI.utils.EventEmitter{
 	constructor(){
 		super();
 		this._sprites = [];

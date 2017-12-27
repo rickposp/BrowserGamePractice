@@ -1,7 +1,7 @@
 import Random from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
-import AnimatedSpriteManager from './animated_sprite_manager.js';
+import AnimatedSpriteManager from './animation_runner.js';
 import SpriteEmitter from './sprite_emitter.js';
 import Ship from './ship.js';
 

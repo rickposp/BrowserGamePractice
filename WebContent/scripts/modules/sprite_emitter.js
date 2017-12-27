@@ -1,6 +1,6 @@
 import * as Timer from '../library/pixi-timer.js';
-import AnimatedSprite from './animated_sprite.js';
-import AnimatedSpriteManager from './animated_sprite_manager.js';
+import AnimatedSprite from './animation.js';
+import AnimatedSpriteManager from './animation_runner.js';
 
 export default class spriteEmitter extends PIXI.Container {
 	

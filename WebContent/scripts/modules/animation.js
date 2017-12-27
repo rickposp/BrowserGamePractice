@@ -1,5 +1,5 @@
 // Animation
-export default class animatedSprite extends PIXI.Sprite {
+export default class animation extends PIXI.Sprite {
 	
 	constructor(start_point, end_point, speed, texture, manager = null){
 		super(texture);
