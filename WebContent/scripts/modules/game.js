@@ -224,27 +224,6 @@ export default function Game(){
 		let ship = new Ship(opts);
 		game_state["engine"]["ships"].push(ship);
 	}
-	
-	function fire_beams(ship, destination){
-		let opts = {
-				"container" : game_state["engine"]["pixi_app"].stage,
-				"origin" : new PIXI.Point(0, 0), // anchor is in the middle of the ship
-				"destination" : destination,
-				"speed" : 5,
-				"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
-				"duration" : 1000,
-				"rate" : 0.005
-			}
-		let emitter = new SpriteEmitter(opts);
-		game_state["engine"]["sprite_emitters"].push(emitter);
-		
-		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-		let bound_function = emitter.start.bind(emitter);
-		
-		var timer = PIXI.timerManager.createTimer(2 * 1000);
-		timer.on('end', bound_function);
-		timer.start();
-	}
 
 	PIXI.loader
 	.add("img/alien4.png")
