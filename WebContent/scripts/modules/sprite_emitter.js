@@ -1,16 +1,14 @@
-import * as Timer from '../library/pixi-timer.js';
-import AnimatedSprite from './animation.js';
-import AnimatedSpriteManager from './animation_runner.js';
+import AnimationRunner from './animation_runner.js';
 
 export default class spriteEmitter extends PIXI.Container {
 	
 	constructor(opts=null){
 		super();
-		this._sprite_manager = new AnimatedSpriteManager();
-		this._sprite_manager.on(
+		this._animationRunner = new AnimationRunner();
+		this._animationRunner.on(
 				"sprite_reached_destination", 
-				function(sprite){
-					sprite.destroy();
+				function(animation){
+					animation.destroy();
 				}
 			);
 		if(opts){
@@ -19,8 +17,9 @@ export default class spriteEmitter extends PIXI.Container {
 	}
 	
 	configure(opts){
+        this.position = opts["origin"];
+
 		this._container = opts["container"]; // container for all the children of this emitter
-		this.position = opts["origin"];
 		this._destination = opts["destination"];
 		this._speed = opts["speed"];
 		this._texture = opts["texture"];
@@ -44,19 +43,19 @@ export default class spriteEmitter extends PIXI.Container {
 		let end_point = sprite_emitter._destination;
 		let speed = sprite_emitter._speed;
 		let texture = sprite_emitter._texture;
-		let sprite_manager = sprite_emitter._sprite_manager;
+		let animationRunner = sprite_emitter._animationRunner;
 		
-		let sprite = sprite_manager.create(start_point, end_point, speed, texture);
+		let sprite = animationRunner.create(start_point, end_point, speed, texture);
 		container.addChild(sprite);
 	}
 	
 	get sprites(){
-		return this._sprite_manager._sprites;
+		return this._animationRunner._sprites;
 	}
 	
 	update(delta){
 		if(this._configured && this._timer.isStarted){
-			this._sprite_manager.update(delta);
+			this._animationRunner.update(delta);
 		}
 	}
 	
@@ -70,7 +69,7 @@ export default class spriteEmitter extends PIXI.Container {
 	}
 	
 	stop(){
-		if(this.configured){
+		if(this._configured){
 			this._timer.stop();
 		}
 		else{
