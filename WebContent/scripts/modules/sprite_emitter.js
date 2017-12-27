@@ -19,7 +19,7 @@ export default class spriteEmitter extends PIXI.Container {
 	configure(opts){
         this.position = opts["origin"];
 
-		this._container = opts["container"]; // container for all the children of this emitter
+		this._targetContainer = opts["targetContainer"]; // container for all the children of this emitter
 		this._destination = opts["destination"];
 		this._speed = opts["speed"];
 		this._texture = opts["texture"];
@@ -38,7 +38,7 @@ export default class spriteEmitter extends PIXI.Container {
 	
 	_emit(){
 		let sprite_emitter = this.sprite_emitter; // "this" is the timer object that initiates the callback
-		let container = sprite_emitter._container;
+		let container = sprite_emitter._targetContainer;
 		let start_point = sprite_emitter.position;
 		let end_point = sprite_emitter._destination;
 		let speed = sprite_emitter._speed;

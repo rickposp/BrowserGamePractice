@@ -16,7 +16,7 @@ export default class ship{
 		_parent_container.addChild(this.ship);
 		
 		let emitter_opts = {
-				"container" : _parent_container,
+				"targetContainer" : _parent_container,
 				"origin" : new PIXI.Point(100, 100), // anchor is in the middle of the ship
 				"destination" : _target,
 				"speed" : 5,
