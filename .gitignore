@@ -3,3 +3,4 @@ WebContent/node_modules/
 .project
 WebContent/dist/
 node_modules/
+.idea/
