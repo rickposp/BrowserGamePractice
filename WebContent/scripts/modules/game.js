@@ -4,6 +4,7 @@ import Button from './button.js';
 import AnimatedSpriteManager from './animation_runner.js';
 import SpriteEmitter from './sprite_emitter.js';
 import Ship from './ship.js';
+import ButtonFactory from './button_factory.js';
 
 export default function Game(){
 	'use strict';
@@ -21,7 +22,6 @@ export default function Game(){
 
 	let game_state = {
 			"engine": {
-				"alert_text" : "",
 				"pixi_app" : null,
 				"pixi_ticker" : null,
 				"interface_group" : null,
@@ -65,51 +65,12 @@ export default function Game(){
 		game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["interface_group"]));
 		game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["action_group"]));
 
-		let text = new PIXI.Text('',{fontFamily : 'Arial', fontSize: 24, fill : 0xff1010, align : 'center'});
-		game_state["engine"]["alert_text"] = text;
-		text.visible = false;
-		text.parentGroup = game_state["engine"]["interface_group"];
-		game_state["engine"]["pixi_app"].stage.addChild(text);
-		
-		let start_button = new Button(800 - 300,
-		        50, 150, 75);
-        let style = new PIXI.TextStyle({
-            fontFamily: 'Arial', // Font Family
-            fontSize: 22, // Font Size
-            fontStyle: 'italic',// Font Style
-            fontWeight: 'bold', // Font Weight
-            fill: ['#ffffff', '#F8A9F9'], // gradient
-            stroke: '#4a1850',
-            strokeThickness: 5,
-            dropShadow: true,
-            dropShadowColor: '#000000',
-            dropShadowBlur: 4,
-            dropShadowAngle: Math.PI / 6,
-            dropShadowDistance: 6,
-            wordWrap: true,
-            wordWrapWidth: 440
-        });
-        start_button.setText("run", style);
-        start_button.clicked = function() {
-        	// changing the UI directly here to control the main loop
-        	game_state["engine"]["play_button"].visible  = false;
-    		game_state["engine"]["pixi_ticker"].start();
-    		game_state["engine"]["stop_button"].visible = true;
-        };
-        start_button.parentGroup = game_state["engine"]["interface_group"];
+		let buttonFactory = new ButtonFactory();
+		let start_button = buttonFactory.createButton("start", new PIXI.Point(500, 50), game_state);
 		game_state["engine"]["play_button"] = start_button;
 		game_state["engine"]["pixi_app"].stage.addChild(start_button);
 		
-		let stop_button = new Button(800 - 100,
-		        50, 150, 75);
-		stop_button.setText("pause", style);
-		stop_button.visible = false;
-		stop_button.clicked = function() {
-        	game_state["engine"]["stop_button"].visible = false;
-    		game_state["engine"]["pixi_ticker"].stop();
-    		game_state["engine"]["play_button"].visible  = true;
-        };
-		stop_button.parentGroup = game_state["engine"]["interface_group"];
+		let stop_button = buttonFactory.createButton("pause", new PIXI.Point(700, 50), game_state);
 		game_state["engine"]["stop_button"] = stop_button;
 		game_state["engine"]["pixi_app"].stage.addChild(stop_button);
 
