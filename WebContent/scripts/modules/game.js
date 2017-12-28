@@ -32,18 +32,18 @@ export default function Game(){
 	};
 
 	function initialize_game(){
+        let engine = game_state["engine"];
+
 		//Create a Pixi Application
 		game_state["engine"]["pixi_app"] = new PIXI.Application({
-			width: game_constants["engine"]["animation_width"],
-			height: game_constants["engine"]["animation_height"],
+			width: engine["animation_width"],
+			height: engine["animation_height"],
 			antialiasing: true, 
 			transparent: false, 
 			resolution: 1
 		}
 		);
 
-		//specify display list component
-        let engine = game_state["engine"];
         let app = engine["pixi_app"];
 
         app.stage = new PIXI.display.Stage();
