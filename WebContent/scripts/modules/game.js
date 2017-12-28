@@ -35,7 +35,7 @@ export default function Game(){
         let engine = game_state["engine"];
 
 		//Create a Pixi Application
-		game_state["engine"]["pixi_app"] = new PIXI.Application({
+		engine["pixi_app"] = new PIXI.Application({
 			width: game_constants["engine"]["animation_width"],
 			height: game_constants["engine"]["animation_height"],
 			antialiasing: true, 
@@ -142,5 +142,6 @@ export default function Game(){
 	PIXI.loader
 	.add("img/alien4.png")
 	.add("img/blue_beam.png")
+    .add("img/emitter.png")
 	.load(initialize_game);
 }
