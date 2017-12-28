@@ -66,11 +66,28 @@ export default function Game(){
 		game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["action_group"]));
 
 		let buttonFactory = new ButtonFactory();
-		let start_button = buttonFactory.createButton("start", new PIXI.Point(500, 50), game_state);
+		let start_button = buttonFactory.createButton(
+		    "start",
+            new PIXI.Point(500, 50),
+            game_state["engine"]["interface_group"],
+            function() {
+                // changing the UI directly here to control the main loop
+                game_state["engine"]["play_button"].visible  = false;
+                game_state["engine"]["pixi_ticker"].start();
+                game_state["engine"]["stop_button"].visible = true;
+            });
 		game_state["engine"]["play_button"] = start_button;
 		game_state["engine"]["pixi_app"].stage.addChild(start_button);
 		
-		let stop_button = buttonFactory.createButton("pause", new PIXI.Point(700, 50), game_state);
+		let stop_button = buttonFactory.createButton(
+		    "pause",
+            new PIXI.Point(700, 50),
+            game_state["engine"]["interface_group"],
+            function() {
+                game_state["engine"]["stop_button"].visible = false;
+                game_state["engine"]["pixi_ticker"].stop();
+                game_state["engine"]["play_button"].visible  = true;
+            });
 		game_state["engine"]["stop_button"] = stop_button;
 		game_state["engine"]["pixi_app"].stage.addChild(stop_button);
 

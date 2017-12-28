@@ -20,29 +20,20 @@ export default class buttonFactory{
         });
     }
 
-    createButton(type, position, game_state){
+    createButton(type, position, display_group, callback){
         if(type === "start"){
             let start_button = new Button(position.x, position.y, 150, 75);
             start_button.setText("run", this.text_style);
-            start_button.clicked = function() {
-                // changing the UI directly here to control the main loop
-                game_state["engine"]["play_button"].visible  = false;
-                game_state["engine"]["pixi_ticker"].start();
-                game_state["engine"]["stop_button"].visible = true;
-            };
-            start_button.parentGroup = game_state["engine"]["interface_group"];
+            start_button.clicked = callback;
+            start_button.parentGroup = display_group;
             return start_button;
         }
         else if(type === "pause"){
             let stop_button = new Button(position.x, position.y, 150, 75);
             stop_button.setText("pause", this.text_style);
             stop_button.visible = false;
-            stop_button.clicked = function() {
-                game_state["engine"]["stop_button"].visible = false;
-                game_state["engine"]["pixi_ticker"].stop();
-                game_state["engine"]["play_button"].visible  = true;
-            };
-            stop_button.parentGroup = game_state["engine"]["interface_group"];
+            stop_button.clicked = callback;
+            stop_button.parentGroup = display_group;
             return stop_button;
         }
         else{
