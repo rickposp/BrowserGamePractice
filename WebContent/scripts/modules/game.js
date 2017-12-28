@@ -216,7 +216,7 @@ export default function Game(){
 				"end": new PIXI.Point(start.x, game_constants["engine"]["animation_height"] + texture.height),
 				"speed": randomInt(1,3),
 				"parent_container": game_state["engine"]["pixi_app"].stage,
-				"ship_manager": game_state["engine"]["ship_manager"],
+				"animation_runner": game_state["engine"]["ship_manager"],
 				"emitter_manager": game_state["engine"]["sprite_emitters"],
 				"texture": texture,
 				"target" : new PIXI.Point(400, 600)

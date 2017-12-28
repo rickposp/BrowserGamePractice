@@ -2,42 +2,44 @@ import SpriteEmitter from './sprite_emitter.js';
 
 export default class ship{
 	
-	constructor(opts = {}){
+	constructor(opts){
 		let _start = opts["start"];
 		let _end = opts["end"];
 		let _speed = opts["speed"];
 		let _parent_container = opts["parent_container"];
-		let _ship_manager = opts["ship_manager"];
+		let _animation_runner = opts["animation_runner"];
 		let _emitter_manager = opts["emitter_manager"];
 		let _texture = opts["texture"];
 		let _target = opts["target"];
 		
-		this.ship = _ship_manager.create(_start, _end, _speed, _texture);
-		_parent_container.addChild(this.ship);
+		this._animation = _animation_runner.create(_start, _end, _speed, _texture);
+		_parent_container.addChild(this._animation);
 		
 		let emitter_opts = {
 				"targetContainer" : _parent_container,
-				"origin" : new PIXI.Point(100, 100), // anchor is in the middle of the ship
+				"origin" : this._animation.position,
 				"destination" : _target,
 				"speed" : 5,
 				"texture" : PIXI.loader.resources["img/blue_beam.png"].texture,
 				"duration" : 500,
 				"rate" : 0.005
-			}
-		this.emitter = new SpriteEmitter(emitter_opts);
-		_emitter_manager.push(this.emitter);
-		
+			};
+		this._emitter = new SpriteEmitter(emitter_opts);
+		_emitter_manager.push(this._emitter);
+
+		// passing the method of an object as a callback requires us
+		// to indicate what value to use for "this" keyword
 		// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind
-		let bound_function = this.emitter.start.bind(this.emitter);
+		let start_emitter_callback = this._emitter.start.bind(this._emitter);
 		
-		var timer = PIXI.timerManager.createTimer(1 * 1000);
-		timer.on('end', bound_function);
+		let timer = PIXI.timerManager.createTimer(2 * 1000);
+		timer.on('end', start_emitter_callback);
 		timer.start();
 	}
 	
 	update(delta){
 		// move the sprite and the emitter in unison
-		this.emitter.position.copy(this.ship.position);
+		this._emitter.position.copy(this._animation.position);
 	}
 	
 }
