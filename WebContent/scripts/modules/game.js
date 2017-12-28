@@ -36,8 +36,8 @@ export default function Game(){
 
 		//Create a Pixi Application
 		game_state["engine"]["pixi_app"] = new PIXI.Application({
-			width: engine["animation_width"],
-			height: engine["animation_height"],
+			width: game_constants["engine"]["animation_width"],
+			height: game_constants["engine"]["animation_height"],
 			antialiasing: true, 
 			transparent: false, 
 			resolution: 1
