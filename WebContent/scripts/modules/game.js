@@ -26,7 +26,6 @@ export default function Game(){
 				"pixi_ticker" : null,
 				"interface_group" : null,
 				"action_group" : null,
-				"pixi_event_emitter" : null,
 				"sprite_emitters" : [],
 				"ships" : []
 			}
@@ -94,8 +93,7 @@ export default function Game(){
 		let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["first_timer"]);
 		timer.on('end', attack_callback);
 		timer.start();
-		
-		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
+
 		game_state["engine"]["ship_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
 	}
 
