@@ -4,34 +4,34 @@ import AnimatedSprite from './animation.js';
 export default class animationRunner extends PIXI.utils.EventEmitter{
 	constructor(){
 		super();
-		this._sprites = [];
+		this._animations = [];
 	}
 	
-	add(sprite){
-		this._sprites.push(sprite);
+	add(animations){
+		this.animations.push(animations);
 	}
 	
 	create(start_point, end_point, speed, texture){
 		return new AnimatedSprite(start_point, end_point, speed, texture, this);
 	}
 	
-	remove(sprite){
-		var index = this.sprites.indexOf(sprite);
+	remove(animations){
+		let index = this.animations.indexOf(animations);
 		if (index > -1) {
-			this._sprites.splice(index, 1);
+			this._animations.splice(index, 1);
 		}
 	}
 	
 	update(delta){
-		this._sprites.forEach(function(sprite){
-			if(sprite.destinationReached){
-				this.emit('sprite_reached_destination', sprite);
+		this.animations.forEach(function(animation){
+			if(animation.destinationReached){
+				this.emit('sprite_reached_destination', animation);
 			}
-			sprite.update(delta);
+			animation.update(delta);
 		}, this);
 	}
 	
-	get sprites(){
-		return this._sprites;
+	get animations(){
+		return this._animations;
 	}
 }

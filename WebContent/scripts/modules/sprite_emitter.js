@@ -50,7 +50,7 @@ export default class spriteEmitter extends PIXI.Container {
 	}
 	
 	get sprites(){
-		return this._animationRunner._sprites;
+		return this._animationRunner.animations;
 	}
 	
 	update(delta){
