@@ -33,9 +33,9 @@ export default function Game(){
 
 	function initialize_game(){
 		//Create a Pixi Application
-		game_state["engine"]["pixi_app"] = new PIXI.Application({ 
-			width: game_constants["engine"]["animation_width"], 
-			height: game_constants["engine"]["animation_height"],                      
+		game_state["engine"]["pixi_app"] = new PIXI.Application({
+			width: game_constants["engine"]["animation_width"],
+			height: game_constants["engine"]["animation_height"],
 			antialiasing: true, 
 			transparent: false, 
 			resolution: 1
@@ -43,58 +43,61 @@ export default function Game(){
 		);
 
 		//specify display list component
-		game_state["engine"]["pixi_app"].stage = new PIXI.display.Stage();
-		game_state["engine"]["pixi_app"].stage.group.enableSort = true;
+        let engine = game_state["engine"];
+        let app = engine["pixi_app"];
+
+        app.stage = new PIXI.display.Stage();
+		app.stage.group.enableSort = true;
 
 		//Add the canvas that Pixi automatically created for you to the HTML document
-		document.getElementById("animation_pane").appendChild(game_state["engine"]["pixi_app"].view);
+		document.getElementById("animation_pane").appendChild(app.view);
 
-		game_state["engine"]["pixi_ticker"] = new PIXI.ticker.Ticker();
+		engine["pixi_ticker"] = new PIXI.ticker.Ticker();
 
-		game_state["engine"]["pixi_ticker"].add(delta =>
+		engine["pixi_ticker"].add(delta =>
 			update(delta)
 		);
-		game_state["engine"]["pixi_ticker"].add(delta =>
+		engine["pixi_ticker"].add(delta =>
 			draw(delta)
 		);
 
-		game_state["engine"]["interface_group"] = new PIXI.display.Group(1, true);
-		game_state["engine"]["action_group"] = new PIXI.display.Group(0, true);
+		engine["interface_group"] = new PIXI.display.Group(1, true);
+		engine["action_group"] = new PIXI.display.Group(0, true);
 
-		game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["interface_group"]));
-		game_state["engine"]["pixi_app"].stage.addChild(new PIXI.display.Layer(game_state["engine"]["action_group"]));
+		engine["pixi_app"].stage.addChild(new PIXI.display.Layer(engine["interface_group"]));
+		engine["pixi_app"].stage.addChild(new PIXI.display.Layer(engine["action_group"]));
 
 		let buttonFactory = new ButtonFactory();
 		let start_button = buttonFactory.createButton(
 		    "start",
             new PIXI.Point(500, 50),
-            game_state["engine"]["interface_group"],
+            engine["interface_group"],
             function() {
                 // changing the UI directly here to control the main loop
-                game_state["engine"]["play_button"].visible  = false;
-                game_state["engine"]["pixi_ticker"].start();
-                game_state["engine"]["stop_button"].visible = true;
+                engine["play_button"].visible  = false;
+                engine["pixi_ticker"].start();
+                engine["stop_button"].visible = true;
             });
-		game_state["engine"]["play_button"] = start_button;
-		game_state["engine"]["pixi_app"].stage.addChild(start_button);
+		engine["play_button"] = start_button;
+		app.stage.addChild(start_button);
 		
 		let stop_button = buttonFactory.createButton(
 		    "pause",
             new PIXI.Point(700, 50),
-            game_state["engine"]["interface_group"],
+            engine["interface_group"],
             function() {
-                game_state["engine"]["stop_button"].visible = false;
-                game_state["engine"]["pixi_ticker"].stop();
-                game_state["engine"]["play_button"].visible  = true;
+                engine["stop_button"].visible = false;
+                engine["pixi_ticker"].stop();
+                engine["play_button"].visible  = true;
             });
-		game_state["engine"]["stop_button"] = stop_button;
-		game_state["engine"]["pixi_app"].stage.addChild(stop_button);
+		engine["stop_button"] = stop_button;
+		app.stage.addChild(stop_button);
 
 		let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["first_timer"]);
 		timer.on('end', attack_callback);
 		timer.start();
 
-		game_state["engine"]["ship_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
+		engine["ship_manager"] = new AnimatedSpriteManager(app.stage);
 	}
 
 	function attack_callback(){
