@@ -1,4 +1,4 @@
-import Random from './random.js';
+import {randomInt} from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
 import AnimatedSpriteManager from './animation_runner.js';
@@ -10,83 +10,27 @@ export default function Game(){
 	let game_constants = {
 			"ai": {
 				"attack" : {
-					"base_damage" : 2,
-					"damage_range" : 10,
-					"imminent_base_timer" : 1000 * 60 * 2,
-					"base_timer" : 1000 * 60 * 2,
-					"timer_range" : 1000 * 60 * 5,
-					"first_timer" : 1000 * 1,
-					"cooldown_timer" : 1000 * 10,
-				},
-				"ships" : {
-					"damage" : 1
-				}
-			},
-			"economy": {
-				"small_factory": {
-					"cost": 100,
-					"profit_rate": .002,
-					"health" : 1
-				},
-				"large_factory": {
-					"cost": 400,
-					"profit_rate": .010,
-					"health" : 1
-				}
-			},
-			"military": {
-				"light_turret": {
-					"cost": 200,
-					"expense_rate": 0.0005,
-					"counter_rate": 2,
-					"health" : 1
-				},
-				"heavy_turret": {
-					"cost": 800,
-					"expense_rate": .0020,
-					"counter_rate": 10,
-					"health" : 1
+					"first_timer" : 1000
 				}
 			},
 			"engine": {
-				"account_balance_update_interval": 1000,
 				"animation_width" : 800,
 				"animation_height" : 600
 			}
 	};
 
 	let game_state = {
-			"ai": {
-			},
-			"economy": {
-				"account_balance": 200,
-				"small_factories": 0,
-				"large_factories": 0
-			},
-			"military": {
-				"light_turrets": 0,
-				"heavy_turrets": 0
-			},
 			"engine": {
-				"ship_sprites" : [],
-				"projectile_manager" : null,
 				"alert_text" : "",
 				"pixi_app" : null,
 				"pixi_ticker" : null,
 				"interface_group" : null,
 				"action_group" : null,
-				"display_income_rate" : 0,
-				"user_interface_events" : [],
 				"pixi_event_emitter" : null,
 				"sprite_emitters" : [],
 				"ships" : []
 			}
-	}
-
-	//The `randomInt` helper function
-	function randomInt(min, max) {
-		return Math.floor(Random() * (max - min + 1)) + min;
-	}
+	};
 
 	function initialize_game(){
 		//Create a Pixi Application
@@ -151,7 +95,7 @@ export default function Game(){
         	game_state["engine"]["play_button"].visible  = false;
     		game_state["engine"]["pixi_ticker"].start();
     		game_state["engine"]["stop_button"].visible = true;
-        }
+        };
         start_button.parentGroup = game_state["engine"]["interface_group"];
 		game_state["engine"]["play_button"] = start_button;
 		game_state["engine"]["pixi_app"].stage.addChild(start_button);
@@ -164,21 +108,17 @@ export default function Game(){
         	game_state["engine"]["stop_button"].visible = false;
     		game_state["engine"]["pixi_ticker"].stop();
     		game_state["engine"]["play_button"].visible  = true;
-        }
+        };
 		stop_button.parentGroup = game_state["engine"]["interface_group"];
 		game_state["engine"]["stop_button"] = stop_button;
 		game_state["engine"]["pixi_app"].stage.addChild(stop_button);
 
-		var timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["first_timer"]);
+		let timer = PIXI.timerManager.createTimer(game_constants["ai"]["attack"]["first_timer"]);
 		timer.on('end', attack_callback);
 		timer.start();
 		
 		game_state['engine']['pixi_event_emitter'] = new PIXI.utils.EventEmitter();
 		game_state["engine"]["ship_manager"] = new AnimatedSpriteManager(game_state["engine"]["pixi_app"].stage);
-	}
-
-	function register_user_interface_event(event){
-		game_state["engine"]["user_interface_events"].push(event);
 	}
 
 	function attack_callback(){
@@ -193,12 +133,7 @@ export default function Game(){
 		PIXI.timerManager.update(frame_delta * delta); // update takes argument in seconds
 	}
 
-	function process_user_interface_events(){
-		game_state['engine']['pixi_event_emitter'].emit('ui_event');
-	}
-
 	function draw(delta) {
-		process_user_interface_events();
 		game_state["engine"]["sprite_emitters"].forEach(function(emitter){
 			emitter.update(delta);
 		});
