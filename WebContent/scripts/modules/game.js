@@ -1,7 +1,7 @@
 import {randomInt} from './random.js';
 import * as Timer from '../library/pixi-timer.js';
 import Button from './button.js';
-import AnimatedSpriteManager from './animation_runner.js';
+import AnimationRunner from './animation_runner.js';
 import SpriteEmitter from './sprite_emitter.js';
 import Ship from './ship.js';
 import ButtonFactory from './button_factory.js';
@@ -28,7 +28,13 @@ export default function Game(){
 				"action_group" : null,
 				"sprite_emitters" : [],
 				"ships" : []
-			}
+			},
+            "control" : {
+			    "w_pressed" : false,
+                "a_pressed" : false,
+                "s_pressed" : false,
+                "d_pressed" : false
+            }
 	};
 
 	function initialize_game(){
@@ -97,8 +103,106 @@ export default function Game(){
 		timer.on('end', attack_callback);
 		timer.start();
 
-		engine["ship_manager"] = new AnimatedSpriteManager(app.stage);
+		engine["animation_runner"] = new AnimationRunner(app.stage);
+
+        let listener = new window.keypress.Listener();
+
+        listener.register_combo({
+            "keys"              : "w",
+            "on_keydown"        : w_down,
+            "on_keyup"          : w_up,
+            "this"              : undefined,
+            "prevent_default"   : false,
+            "prevent_repeat"    : true,
+            "is_unordered"      : true,
+            "is_counting"       : false,
+            "is_exclusive"      : true,
+            "is_solitary"       : false,
+            "is_sequence"       : false
+        });
+
+        listener.register_combo({
+            "keys"              : "a",
+            "on_keydown"        : a_down,
+            "on_keyup"          : a_up,
+            "this"              : undefined,
+            "prevent_default"   : false,
+            "prevent_repeat"    : true,
+            "is_unordered"      : true,
+            "is_counting"       : false,
+            "is_exclusive"      : true,
+            "is_solitary"       : false,
+            "is_sequence"       : false
+        });
+
+        listener.register_combo({
+            "keys"              : "s",
+            "on_keydown"        : s_down,
+            "on_keyup"          : s_up,
+            "this"              : undefined,
+            "prevent_default"   : false,
+            "prevent_repeat"    : true,
+            "is_unordered"      : true,
+            "is_counting"       : false,
+            "is_exclusive"      : true,
+            "is_solitary"       : false,
+            "is_sequence"       : false
+        });
+
+        listener.register_combo({
+            "keys"              : "d",
+            "on_keydown"        : d_down,
+            "on_keyup"          : d_up,
+            "this"              : undefined,
+            "prevent_default"   : false,
+            "prevent_repeat"    : true,
+            "is_unordered"      : true,
+            "is_counting"       : false,
+            "is_exclusive"      : true,
+            "is_solitary"       : false,
+            "is_sequence"       : false
+        });
 	}
+
+	function w_down(){
+        game_state["control"]["w_pressed"] = true;
+        console.log("start moving forward");
+    }
+
+    function w_up(){
+	    game_state["control"]["w_pressed"] = false;
+        console.log("stop moving foward")
+    }
+
+    function a_down(){
+        game_state["control"]["a_pressed"] = true;
+        console.log("start moving left");
+    }
+
+    function a_up(){
+        game_state["control"]["a_pressed"] = false;
+        console.log("stop moving left")
+    }
+
+    function s_down(){
+        game_state["control"]["s_pressed"] = true;
+        console.log("start moving back");
+    }
+
+    function s_up(){
+        game_state["control"]["s_pressed"] = false;
+        console.log("stop moving back")
+    }
+
+    function d_down(){
+        game_state["control"]["d_pressed"] = true;
+        console.log("start moving right");
+    }
+
+    function d_up(){
+        game_state["control"]["d_pressed"] = false;
+        console.log("stop moving right")
+    }
 
 	function attack_callback(){
 		add_ship_to_stage();
@@ -113,7 +217,7 @@ export default function Game(){
 	}
 
 	function draw(delta) {
-		game_state["engine"]["ship_manager"].update(delta);
+		game_state["engine"]["animation_runner"].update(delta);
 	}
 	
 	function add_ship_to_stage(){
@@ -124,7 +228,7 @@ export default function Game(){
 				"end": new PIXI.Point(start.x, game_constants["engine"]["animation_height"] + texture.height),
 				"speed": randomInt(1,3),
 				"parent_container": game_state["engine"]["pixi_app"].stage,
-				"animation_runner": game_state["engine"]["ship_manager"],
+				"animation_runner": game_state["engine"]["animation_runner"],
 		};
 		let ship = new Ship(opts);
 	}
