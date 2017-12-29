@@ -1,9 +1,9 @@
 // Animation
 export default class animation extends PIXI.Sprite {
 	
-	constructor(start_point, end_point, speed, texture, manager = null){
+	constructor(start_point, end_point, speed, texture, animation_runner = null){
 		super(texture);
-		this._manager = manager;
+		this._animation_runner = animation_runner;
 		this._start_point = new PIXI.Point();
 		this._start_point.copy(start_point);
 		this._end_point = new PIXI.Point();
@@ -20,11 +20,10 @@ export default class animation extends PIXI.Sprite {
 		}
 		
 		this.position = start_point;
-		this.anchor.set(0,0);
 		this.pivot.set(this.width/2, this.height/2);
 		
-		if(this._manager){
-			this._manager.add(this);
+		if(this._animation_runner){
+			this._animation_runner.add(this);
 		}
 	}
 	
@@ -46,7 +45,7 @@ export default class animation extends PIXI.Sprite {
 		let dist_y = Math.abs(delta_y);
 		let base_angle;
 		let angle;
-		if((dist_x != 0) && (dist_y != 0))
+		if((dist_x !== 0) && (dist_y !== 0))
 		{
 			base_angle = Math.atan(dist_y/dist_x);
 			if(delta_x > 0 && delta_y > 0)
@@ -74,7 +73,7 @@ export default class animation extends PIXI.Sprite {
 				this.vy = -(this._speed * Math.sin(base_angle));
 			}
 		}
-		else if(delta_x == 0){
+		else if(delta_x === 0){
 			if(delta_y > 0)
 			{
 				this.vx = 0;
@@ -126,8 +125,8 @@ export default class animation extends PIXI.Sprite {
 			this._moving = false;
 		}
 		
-		if(((this.vx != 0) || 
-		   (this.vy != 0)) &&
+		if(((this.vx !== 0) ||
+		   (this.vy !== 0)) &&
 		   !this._destination_reached){
 			this._moving = true;
 		}
