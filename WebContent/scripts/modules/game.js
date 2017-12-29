@@ -113,12 +113,6 @@ export default function Game(){
 	}
 
 	function draw(delta) {
-		game_state["engine"]["sprite_emitters"].forEach(function(emitter){
-			emitter.update(delta);
-		});
-		game_state["engine"]["ships"].forEach(function(ship){
-			ship.update(delta);
-		});
 		game_state["engine"]["ship_manager"].update(delta);
 	}
 	
@@ -131,12 +125,8 @@ export default function Game(){
 				"speed": randomInt(1,3),
 				"parent_container": game_state["engine"]["pixi_app"].stage,
 				"animation_runner": game_state["engine"]["ship_manager"],
-				"emitter_manager": game_state["engine"]["sprite_emitters"],
-				"texture": texture,
-				"target" : new PIXI.Point(400, 600)
 		};
 		let ship = new Ship(opts);
-		game_state["engine"]["ships"].push(ship);
 	}
 
 	PIXI.loader
