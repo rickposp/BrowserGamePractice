@@ -28,13 +28,9 @@ export default class ship{
 				"rate" : 0.005
 			};
 		this._emitter = new SpriteEmitter(emitter_opts);
-		this._emitter.texture = PIXI.loader.resources["img/emitter.png"].texture;
-		this._emitter.position = new PIXI.Point(0, -50);
-        this._emitter.scale.x = 0.1;
-        this._emitter.scale.y = 0.1;
+		this._emitter.position = new PIXI.Point(this._animation.width/4, 0);
         this._animation.addChild(this._emitter);
 		_emitter_manager.push(this._emitter);
-		console.log(this._emitter);
 
 		// passing the method of an object as a callback requires us
 		// to indicate what value to use for "this" keyword
@@ -47,11 +43,9 @@ export default class ship{
 	}
 	
 	update(delta){
-		// move the sprite and the emitter in unison
-		this._emitter.sprite_origin.copy(this._parent_container.toLocal(this._emitter.position, this._animation));
-		console.log(this._parent_container);
-		console.log(this._animation);
-		console.log(this._emitter);
+		// move the sprite origin and the emitter in unison
+        let new_position = this._parent_container.toLocal(this._emitter.position, this._emitter);
+		this._emitter.sprite_origin.copy(new_position);
 	}
 	
 }
