@@ -172,42 +172,34 @@ export default function Game(){
 
 	function w_down(){
         game_state["control"]["w_pressed"] = true;
-        console.log("start moving forward");
     }
 
     function w_up(){
 	    game_state["control"]["w_pressed"] = false;
-        console.log("stop moving foward")
     }
 
     function a_down(){
         game_state["control"]["a_pressed"] = true;
-        console.log("start moving left");
     }
 
     function a_up(){
         game_state["control"]["a_pressed"] = false;
-        console.log("stop moving left")
     }
 
     function s_down(){
         game_state["control"]["s_pressed"] = true;
-        console.log("start moving back");
     }
 
     function s_up(){
         game_state["control"]["s_pressed"] = false;
-        console.log("stop moving back")
     }
 
     function d_down(){
         game_state["control"]["d_pressed"] = true;
-        console.log("start moving right");
     }
 
     function d_up(){
         game_state["control"]["d_pressed"] = false;
-        console.log("stop moving right")
     }
 
 	function attack_callback(){
@@ -264,6 +256,12 @@ export default function Game(){
         }
         if(game_state["control"]["d_pressed"]) {
             vx = game_constants["control"]["speed"];
+        }
+        if(game_state["control"]["w_pressed"] && game_state["control"]["s_pressed"]){
+            vy = 0;
+        }
+        if(game_state["control"]["a_pressed"] && game_state["control"]["d_pressed"]){
+            vx = 0;
         }
         game_state["engine"]["player"].vx = vx;
         game_state["engine"]["player"].vy = vy;
