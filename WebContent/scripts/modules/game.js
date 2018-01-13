@@ -17,7 +17,10 @@ export default function Game(){
 			"engine": {
 				"animation_width" : 800,
 				"animation_height" : 600
-			}
+			},
+            "control": {
+			    "speed" : 3
+            }
 	};
 
 	let game_state = {
@@ -27,7 +30,8 @@ export default function Game(){
 				"interface_group" : null,
 				"action_group" : null,
 				"sprite_emitters" : [],
-				"ships" : []
+				"ships" : [],
+                "player" : null
 			},
             "control" : {
 			    "w_pressed" : false,
@@ -162,6 +166,8 @@ export default function Game(){
             "is_solitary"       : false,
             "is_sequence"       : false
         });
+
+        add_player_to_stage();
 	}
 
 	function w_down(){
@@ -218,6 +224,7 @@ export default function Game(){
 
 	function draw(delta) {
 		game_state["engine"]["animation_runner"].update(delta);
+        update_player(delta);
 	}
 	
 	function add_ship_to_stage(){
@@ -233,8 +240,40 @@ export default function Game(){
 		let ship = new Ship(opts);
 	}
 
+	function add_player_to_stage(){
+        let texture = PIXI.loader.resources["img/blueship3.png"].texture;
+        let player = new PIXI.Sprite(texture);
+        player.x = game_constants["engine"]["animation_width"]/2;
+        player.y = game_constants["engine"]["animation_height"]/2;
+        player.pivot = new PIXI.Point(player.width/2, player.height/2);
+        game_state["engine"]["pixi_app"].stage.addChild(player);
+        game_state["engine"]["player"] = player;
+    }
+
+    function update_player(delta){
+	    let vy = 0;
+	    let vx = 0;
+        if(game_state["control"]["w_pressed"]){
+            vy = -game_constants["control"]["speed"];
+        }
+        if(game_state["control"]["a_pressed"]){
+            vx = -game_constants["control"]["speed"];
+        }
+        if(game_state["control"]["s_pressed"]){
+            vy = game_constants["control"]["speed"];
+        }
+        if(game_state["control"]["d_pressed"]) {
+            vx = game_constants["control"]["speed"];
+        }
+        game_state["engine"]["player"].vx = vx;
+        game_state["engine"]["player"].vy = vy;
+        game_state["engine"]["player"].x += game_state["engine"]["player"].vx * delta;
+        game_state["engine"]["player"].y += game_state["engine"]["player"].vy * delta;
+    }
+
 	PIXI.loader
 	.add("img/alien4.png")
+    .add("img/blueship3.png")
 	.add("img/blue_beam.png")
     .add("img/emitter.png")
 	.load(initialize_game);
